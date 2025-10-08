@@ -172,7 +172,6 @@ function Plexus() {
         });
         ref.current.instanceMatrix.needsUpdate = true;
         
-        // Update lines
         const positions = lineRef.current.geometry.attributes.position.array as Float32Array;
         let vertexpos = 0;
         
