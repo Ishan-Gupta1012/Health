@@ -20,10 +20,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased text-foreground">
-        <div className="bg"></div>
-        <div className="bg bg2"></div>
-        <div className="bg bg3"></div>
+      <body className="font-body antialiased text-foreground bg-gradient-to-br from-cyan-100 via-purple-100 to-rose-100">
         {children}
         <Toaster />
       </body>
