@@ -1,19 +1,23 @@
 import { FeaturesSection } from '@/components/features-section';
 import { AboutSection } from '@/components/about-section';
 import { Footer } from '@/components/footer';
-import { HeroWave } from '@/components/hero-wave';
-
+import CyberneticGridShader from '@/components/cybernetic-grid-shader';
+import { Header } from '@/components/header';
 
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <Header />
       <main className="flex-1">
-        <HeroWave 
-          title="Your Unified Smart Health Assistant"
-          subtitle="Smart health tracking, doctor finder, medicine reminders & record sharing — all in one place."
-          placeholder="e.g., Check my symptoms for a headache and fever..."
-          buttonText="Ask"
-        />
+        <CyberneticGridShader />
+        <div className="relative z-10 flex h-screen flex-col items-center justify-center text-center">
+            <h1 className="text-4xl font-bold tracking-tighter text-foreground sm:text-6xl">
+                Your Unified Smart Health Assistant
+            </h1>
+            <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
+                Smart health tracking, doctor finder, medicine reminders & record sharing — all in one place.
+            </p>
+        </div>
         <FeaturesSection />
         <AboutSection />
       </main>
