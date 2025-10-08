@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'HealthNest – Your Unified Smart Health Assistant',
@@ -20,6 +21,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased text-foreground">
+        <div className="bg"></div>
+        <div className="bg bg2"></div>
+        <div className="bg bg3"></div>
         {children}
         <Toaster />
       </body>
