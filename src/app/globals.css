@@ -110,19 +110,4 @@
     
     @apply rounded-xl;
   }
-
-  .grid-glow-animation [stroke] {
-    animation: grid-glow 4s linear infinite;
-  }
-
-  @keyframes grid-glow {
-    0%, 100% {
-      stroke-opacity: 0.2;
-      filter: drop-shadow(0 0 2px hsl(var(--primary) / 0.8));
-    }
-    50% {
-      stroke-opacity: 0.8;
-      filter: drop-shadow(0 0 8px hsl(var(--primary) / 1));
-    }
-  }
 }
