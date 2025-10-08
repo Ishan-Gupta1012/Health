@@ -8,23 +8,23 @@
   }
 
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 210 40% 98%;
-    --card-foreground: 222.2 84% 4.9%;
+    --background: 225 100% 97%; /* Light Lavender */
+    --foreground: 225 20% 15%;
+    --card: 255 100% 100% / 0.15;
+    --card-foreground: 225 20% 15%;
     --popover: 210 40% 98%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 217 91% 60%;
+    --primary: 152 70% 60%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 340 80% 96%;
+    --secondary-foreground: 340 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
+    --accent: 200 90% 70%;
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
+    --border: 255 100% 100% / 0.2;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --chart-1: 217 91% 60%;
@@ -45,7 +45,7 @@
   .dark {
     --background: 222 84% 5%;
     --foreground: 210 40% 98%;
-    --card: 222 84% 7%;
+    --card: 222 84% 7% / 0.15;
     --card-foreground: 210 40% 98%;
     --popover: 222 84% 5%;
     --popover-foreground: 210 40% 98%;
@@ -83,7 +83,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-transparent;
+    @apply bg-background text-foreground;
     margin: 0;
   }
 }
@@ -91,5 +91,11 @@
 @layer utilities {
   .gradient-text {
     @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+
+  .glass-card {
+    @apply bg-card backdrop-blur-xl shadow-lg;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    border: 1px solid hsl(var(--border));
   }
 }

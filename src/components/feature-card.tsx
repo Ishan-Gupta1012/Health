@@ -10,7 +10,7 @@ interface FeatureCardProps {
 
 export function FeatureCard({ icon, title, description, children }: FeatureCardProps) {
   return (
-    <Card className="flex h-full flex-col overflow-hidden transition-all hover:shadow-xl hover:shadow-primary/20 hover:-translate-y-1">
+    <Card className="flex h-full flex-col overflow-hidden transition-all hover:shadow-xl hover:shadow-primary/20 hover:-translate-y-1 glass-card">
       <CardHeader className="flex flex-row items-start gap-4 space-y-0 pb-4">
         <div className="rounded-lg bg-primary/10 p-3 text-primary">
           {icon}

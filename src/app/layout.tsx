@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
+import { InteractiveBlob } from '@/components/interactive-blob';
 
 export const metadata: Metadata = {
   title: 'HealthNest – Your Unified Smart Health Assistant',
@@ -20,8 +21,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased text-foreground bg-gradient-to-br from-cyan-100 via-purple-100 to-rose-100">
-        {children}
+      <body className="font-body antialiased">
+        <InteractiveBlob />
+        <main className="relative z-10">{children}</main>
         <Toaster />
       </body>
     </html>

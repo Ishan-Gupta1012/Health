@@ -86,11 +86,11 @@ export function PrescriptionUpload() {
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="w-full mt-auto">
+                <Button variant="outline" className="w-full mt-auto bg-white/30 hover:bg-white/50">
                     Upload Prescription
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-lg">
+            <DialogContent className="sm:max-w-lg glass-card">
                 <DialogHeader>
                     <DialogTitle>Upload Prescription</DialogTitle>
                     <DialogDescription>
@@ -104,7 +104,7 @@ export function PrescriptionUpload() {
                         <ScrollArea className="h-[300px] rounded-md border p-4">
                             <div className="space-y-4">
                             {state.result.medicines.map((medicine, index) => (
-                                <Card key={index}>
+                                <Card key={index} className="glass-card">
                                     <CardHeader className="p-4">
                                         <CardTitle className="text-base">{medicine}</CardTitle>
                                     </CardHeader>

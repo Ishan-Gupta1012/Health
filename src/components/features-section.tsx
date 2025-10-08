@@ -16,7 +16,7 @@ export function FeaturesSection() {
             From checking your symptoms to managing your health records, HealthNest has you covered.
           </p>
         </div>
-        <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-8 sm:grid-cols-2">
             <SymptomCheckerCard />
             <DoctorFinderCard />
             <MedicineRemindersCard />
@@ -34,7 +34,7 @@ function SymptomCheckerCard() {
             title="Symptom Checker"
             description="Enter your symptoms and get AI-powered insights on possible causes. Not a substitute for professional medical advice."
         >
-            <Button asChild variant="outline" className="w-full mt-auto">
+            <Button asChild variant="outline" className="w-full mt-auto bg-white/30 hover:bg-white/50">
               <Link href="/symptom-checker">Check Symptoms Now</Link>
             </Button>
         </FeatureCard>
@@ -60,7 +60,7 @@ function DoctorFinderCard() {
             title="Nearby Doctor Finder"
             description="Find verified doctors and specialists near you. Filter by specialty, distance, and patient reviews."
         >
-            <Button variant="outline" className="w-full mt-auto">Find a Doctor</Button>
+            <Button variant="outline" className="w-full mt-auto bg-white/30 hover:bg-white/50">Find a Doctor</Button>
         </FeatureCard>
     );
 }
@@ -72,7 +72,7 @@ function MedicalRecordSharingCard() {
             title="Medical Record Sharing"
             description="Securely upload, store, and share your medical records with healthcare providers in just a few clicks."
         >
-            <Button variant="outline" className="w-full mt-auto">Share Records</Button>
+            <Button variant="outline" className="w-full mt-auto bg-white/30 hover:bg-white/50">Share Records</Button>
         </FeatureCard>
     );
 }

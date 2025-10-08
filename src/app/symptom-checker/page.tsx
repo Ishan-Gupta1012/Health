@@ -93,10 +93,10 @@ export default function SymptomCheckerPage() {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-gradient-to-br from-cyan-100 via-purple-100 to-rose-100">
+    <div className="relative min-h-screen w-full">
       <Header />
       <div className="flex items-center justify-center min-h-screen px-4 py-24">
-        <div className="w-full max-w-4xl bg-white/40 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20">
+        <div className="w-full max-w-4xl glass-card rounded-2xl">
           <div className="p-8 md:p-12">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6 text-center">
               Symptom Checker
@@ -160,7 +160,7 @@ export default function SymptomCheckerPage() {
       </div>
 
        <Dialog open={state.status === 'loading' || state.status === 'success' || state.status === 'error'} onOpenChange={handleCloseDialog}>
-        <DialogContent onEscapeKeyDown={handleCloseDialog} className="sm:max-w-md">
+        <DialogContent onEscapeKeyDown={handleCloseDialog} className="sm:max-w-md glass-card">
            <DialogHeader>
             <DialogTitle>
               {state.status === 'loading' && 'Analyzing Symptoms...'}
