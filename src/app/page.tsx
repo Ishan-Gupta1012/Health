@@ -21,7 +21,7 @@ export default function Home() {
               Smart health tracking, doctor finder, medicine reminders & record sharing — all in one place.
             </p>
             <div className="flex gap-4 mt-8">
-              <Button size="lg" asChild>
+              <Button size="lg" asChild className="neon-shadow-primary-hover">
                 <a href="#features" data-scroll-to>Get Started</a>
               </Button>
               <Button size="lg" variant="outline" className="bg-white/20">

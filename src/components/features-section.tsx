@@ -34,7 +34,7 @@ function SymptomCheckerCard() {
             title="Symptom Checker"
             description="Enter your symptoms and get AI-powered insights on possible causes. Not a substitute for professional medical advice."
         >
-            <Button asChild variant="outline" className="w-full mt-auto bg-white/30 hover:bg-white/50 text-foreground">
+            <Button asChild variant="outline" className="w-full mt-auto bg-white/30 hover:bg-white/50 text-foreground neon-shadow-primary-hover">
               <Link href="/symptom-checker">Check Symptoms Now</Link>
             </Button>
         </FeatureCard>
@@ -57,10 +57,10 @@ function DoctorFinderCard() {
     return (
         <FeatureCard
             icon={<UserSearch className="h-8 w-8" />}
-            title="Nearby Doctor Finder"
+            title="Doctor Finder"
             description="Find verified doctors and specialists near you. Filter by specialty, distance, and patient reviews."
         >
-            <Button variant="outline" className="w-full mt-auto bg-white/30 hover:bg-white/50 text-foreground">Find a Doctor</Button>
+            <Button variant="outline" className="w-full mt-auto bg-white/30 hover:bg-white/50 text-foreground neon-shadow-primary-hover">Find a Doctor</Button>
         </FeatureCard>
     );
 }
@@ -72,7 +72,7 @@ function MedicalRecordSharingCard() {
             title="Medical Record Sharing"
             description="Securely upload, store, and share your medical records with healthcare providers in just a few clicks."
         >
-            <Button variant="outline" className="w-full mt-auto bg-white/30 hover:bg-white/50 text-foreground">Share Records</Button>
+            <Button variant="outline" className="w-full mt-auto bg-white/30 hover:bg-white/50 text-foreground neon-shadow-primary-hover">Share Records</Button>
         </FeatureCard>
     );
 }
