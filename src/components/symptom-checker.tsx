@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
 import { symptomChecker, type SymptomCheckerOutput } from '@/ai/flows/symptom-checker';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,26 +22,15 @@ const initialState: {
     result: SymptomCheckerOutput | null;
     error: string | null;
     status: 'idle' | 'loading' | 'success' | 'error';
+    symptoms: string;
 } = {
     result: null,
     error: null,
     status: 'idle',
+    symptoms: '',
 };
 
-function SubmitButton() {
-    const { pending } = useFormStatus();
-    return (
-        <Button type="submit" disabled={pending} className="w-full">
-            <>
-                <Sparkles className="mr-2 h-4 w-4" />
-                Check Symptoms
-            </>
-        </Button>
-    );
-}
-
-async function symptomCheckerAction(prevState: any, formData: FormData) {
-    const symptoms = formData.get('symptoms') as string;
+async function symptomCheckerAction(symptoms: string): Promise<Omit<typeof initialState, 'symptoms'>> {
     if (!symptoms || symptoms.trim().length < 10) {
         return { result: null, error: 'Please describe your symptoms in more detail (at least 10 characters).', status: 'error' };
     }
@@ -56,17 +44,23 @@ async function symptomCheckerAction(prevState: any, formData: FormData) {
 }
 
 export function SymptomChecker() {
-    const [state, formAction] = useFormState(symptomCheckerAction, initialState);
+    const [state, setState] = useState(initialState);
     const [open, setOpen] = useState(false);
-    const { pending } = useFormStatus();
 
     const handleOpenChange = (isOpen: boolean) => {
         if (!isOpen) {
             // Reset state when closing dialog
-             formAction(new FormData(), initialState);
+             setState(initialState);
         }
         setOpen(isOpen);
     };
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setState(prev => ({ ...prev, status: 'loading' }));
+        const formResult = await symptomCheckerAction(state.symptoms);
+        setState(prev => ({ ...prev, ...formResult }));
+    }
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -100,19 +94,21 @@ export function SymptomChecker() {
                             <Button onClick={() => handleOpenChange(false)}>Close</Button>
                         </DialogFooter>
                     </div>
-                ) : pending ? (
+                ) : state.status === 'loading' ? (
                     <div className="flex flex-col items-center justify-center space-y-4 p-8">
                         <LoadingStethoscope />
                         <p className="text-muted-foreground">Checking your symptoms...</p>
                     </div>
                 ) : (
-                    <form action={formAction} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-4">
                         <Textarea
                             name="symptoms"
                             placeholder="e.g., I have a headache, fever, and a sore throat..."
                             rows={5}
                             required
                             minLength={10}
+                            value={state.symptoms}
+                            onChange={(e) => setState(prev => ({...prev, symptoms: e.target.value}))}
                         />
                         {state.status === 'error' && state.error && (
                              <Alert variant="destructive">
@@ -122,7 +118,12 @@ export function SymptomChecker() {
                             </Alert>
                         )}
                         <DialogFooter>
-                             <SubmitButton />
+                             <Button type="submit" disabled={state.status === 'loading'} className="w-full">
+                                <>
+                                    <Sparkles className="mr-2 h-4 w-4" />
+                                    Check Symptoms
+                                </>
+                            </Button>
                         </DialogFooter>
                     </form>
                 )}

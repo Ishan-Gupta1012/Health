@@ -3,6 +3,7 @@ import { FeatureCard } from './feature-card';
 import { SymptomChecker } from './symptom-checker';
 import { Button } from './ui/button';
 import { PrescriptionUpload } from './prescription-upload';
+import Link from 'next/link';
 
 export function FeaturesSection() {
   return (
@@ -34,7 +35,9 @@ function SymptomCheckerCard() {
             title="Symptom Checker"
             description="Enter your symptoms and get AI-powered insights on possible causes. Not a substitute for professional medical advice."
         >
-            <SymptomChecker />
+            <Button asChild variant="outline" className="w-full mt-auto">
+              <Link href="/symptom-checker">Check Symptoms Now</Link>
+            </Button>
         </FeatureCard>
     );
 }
