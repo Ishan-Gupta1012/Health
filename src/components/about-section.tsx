@@ -1,10 +1,12 @@
 import { AnimatedCounter } from "./animated-counter";
+import { HeartbeatAnimation } from "./heartbeat-animation";
 
 export function AboutSection() {
     return (
         <section id="about" className="w-full bg-muted/50 py-12 md:py-24 lg:py-32">
             <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6 lg:gap-10">
-                <div className="space-y-3">
+                <div className="space-y-3 flex flex-col items-center">
+                    <HeartbeatAnimation />
                     <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">About HealthNest</h2>
                     <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                         Our mission is to empower individuals with AI-driven tools for preventive care, fostering better patient-doctor connections and making healthcare management seamless and accessible for everyone.
