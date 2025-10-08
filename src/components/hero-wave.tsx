@@ -294,8 +294,8 @@ export function HeroWave({ className, style, extendLeftPx = 320, title = "Build 
     }
 
     function createInstancedMaterial() {
-      const baseCol = new THREE.Color("hsl(210, 90%, 60%)");
-      const emisCol = new THREE.Color("hsl(200, 100%, 50%)");
+      const baseCol = new THREE.Color("hsl(210, 90%, 70%)");
+      const emisCol = new THREE.Color("hsl(200, 100%, 60%)");
 
       return new THREE.ShaderMaterial({
         defines: { USE_INSTANCING: "" },
@@ -398,7 +398,7 @@ export function HeroWave({ className, style, extendLeftPx = 320, title = "Build 
         side: THREE.FrontSide,
         transparent: true,
         depthWrite: false,
-        blending: THREE.AdditiveBlending,
+        blending: THREE.NormalBlending,
       });
     }
 
@@ -622,11 +622,11 @@ export function HeroWave({ className, style, extendLeftPx = 320, title = "Build 
       waveRenderPass = new RenderPass(waveScene, waveCamera);
       waveComposer.addPass(waveRenderPass);
 
-      waveBloomPass = new UnrealBloomPass(new THREE.Vector2(cameraWidth, cameraHeight), 1.0, 0.68, 0.0);
+      waveBloomPass = new UnrealBloomPass(new THREE.Vector2(cameraWidth, cameraHeight), 0.3, 0.8, 0.0);
       (waveBloomPass as any).resolution.set(cameraWidth * 0.5, cameraHeight * 0.5);
       waveComposer.addPass(waveBloomPass);
 
-      grainPass = createFilmGrainPass();
+      grainPass = createFilmGrainPass(0.2, 0.2);
       waveComposer.addPass(grainPass);
 
       createInstancedBars();
@@ -634,6 +634,8 @@ export function HeroWave({ className, style, extendLeftPx = 320, title = "Build 
       updateGainMultiplier();
       waveCameraInitialized = true;
     }
+
+
 
     let pendingW = 0,
       pendingH = 0,

@@ -4,11 +4,11 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
+    --background: 0 0% 100%;
     --foreground: 220 40% 5%;
-    --card: 210 40% 98%;
+    --card: 0 0% 100%;
     --card-foreground: 220 40% 5%;
-    --popover: 210 40% 98%;
+    --popover: 0 0% 100%;
     --popover-foreground: 220 40% 5%;
     --primary: 210 90% 60%; /* Bright Sky Blue */
     --primary-foreground: 210 40% 98%;
@@ -28,7 +28,7 @@
     --chart-3: 230 80% 65%;
     --chart-4: 190 95% 55%;
     --chart-5: 220 85% 70%;
-    --sidebar-background: 210 40% 98%;
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 220 40% 5%;
     --sidebar-primary: 210 90% 60%;
     --sidebar-primary-foreground: 210 40% 98%;
