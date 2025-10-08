@@ -14,10 +14,11 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Upload, FileCheck2, AlertTriangle, ExternalLink } from 'lucide-react';
+import { Upload, FileCheck2, AlertTriangle, ExternalLink } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import Link from 'next/link';
+import { LoadingStethoscope } from './loading-stethoscope';
 
 type State = {
     status: 'idle' | 'loading' | 'success' | 'error';
@@ -127,6 +128,11 @@ export function PrescriptionUpload() {
                             <Button onClick={() => handleOpenChange(false)}>Close</Button>
                         </DialogFooter>
                     </div>
+                ) : state.status === 'loading' ? (
+                     <div className="flex flex-col items-center justify-center space-y-4 p-8">
+                        <LoadingStethoscope />
+                        <p className="text-muted-foreground">Analyzing your prescription...</p>
+                    </div>
                 ) : (
                     <div className="space-y-4">
                         <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -143,17 +149,10 @@ export function PrescriptionUpload() {
                         
                         <DialogFooter>
                             <Button onClick={handleSubmit} disabled={!file || state.status === 'loading'} className="w-full">
-                                {state.status === 'loading' ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Analyzing...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Upload className="mr-2 h-4 w-4" />
-                                        Analyze Prescription
-                                    </>
-                                )}
+                                <>
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    Analyze Prescription
+                                </>
                             </Button>
                         </DialogFooter>
                     </div>

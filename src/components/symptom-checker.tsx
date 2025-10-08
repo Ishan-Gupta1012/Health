@@ -15,32 +15,28 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Sparkles, AlertTriangle } from 'lucide-react';
+import { Sparkles, AlertTriangle } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
+import { LoadingStethoscope } from './loading-stethoscope';
 
 const initialState: {
     result: SymptomCheckerOutput | null;
     error: string | null;
+    status: 'idle' | 'loading' | 'success' | 'error';
 } = {
     result: null,
     error: null,
+    status: 'idle',
 };
 
 function SubmitButton() {
     const { pending } = useFormStatus();
     return (
         <Button type="submit" disabled={pending} className="w-full">
-            {pending ? (
-                <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Checking...
-                </>
-            ) : (
-                <>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Check Symptoms
-                </>
-            )}
+            <>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Check Symptoms
+            </>
         </Button>
     );
 }
@@ -48,25 +44,26 @@ function SubmitButton() {
 async function symptomCheckerAction(prevState: any, formData: FormData) {
     const symptoms = formData.get('symptoms') as string;
     if (!symptoms || symptoms.trim().length < 10) {
-        return { result: null, error: 'Please describe your symptoms in more detail (at least 10 characters).' };
+        return { result: null, error: 'Please describe your symptoms in more detail (at least 10 characters).', status: 'error' };
     }
 
     try {
         const result = await symptomChecker({ symptoms });
-        return { result, error: null };
+        return { result, error: null, status: 'success' };
     } catch (e) {
-        return { result: null, error: 'An unexpected error occurred. Please try again.' };
+        return { result: null, error: 'An unexpected error occurred. Please try again.', status: 'error' };
     }
 }
 
 export function SymptomChecker() {
     const [state, formAction] = useFormState(symptomCheckerAction, initialState);
     const [open, setOpen] = useState(false);
+    const { pending } = useFormStatus();
 
     const handleOpenChange = (isOpen: boolean) => {
         if (!isOpen) {
             // Reset state when closing dialog
-            formAction(new FormData(), {result: null, error: null});
+             formAction(new FormData(), initialState);
         }
         setOpen(isOpen);
     };
@@ -86,7 +83,7 @@ export function SymptomChecker() {
                     </DialogDescription>
                 </DialogHeader>
 
-                {state.result ? (
+                {state.status === 'success' && state.result ? (
                     <div className="space-y-4">
                         <ScrollArea className="h-[300px] rounded-md border p-4">
                             <h3 className="font-semibold text-lg">Possible Causes:</h3>
@@ -103,6 +100,11 @@ export function SymptomChecker() {
                             <Button onClick={() => handleOpenChange(false)}>Close</Button>
                         </DialogFooter>
                     </div>
+                ) : pending ? (
+                    <div className="flex flex-col items-center justify-center space-y-4 p-8">
+                        <LoadingStethoscope />
+                        <p className="text-muted-foreground">Checking your symptoms...</p>
+                    </div>
                 ) : (
                     <form action={formAction} className="space-y-4">
                         <Textarea
@@ -112,7 +114,7 @@ export function SymptomChecker() {
                             required
                             minLength={10}
                         />
-                        {state.error && (
+                        {state.status === 'error' && state.error && (
                              <Alert variant="destructive">
                                 <AlertTriangle className="h-4 w-4" />
                                 <AlertTitle>Error</AlertTitle>
