@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="relative z-10 w-full py-12 md:py-24 lg:py-32">
+    <section id="features" className="w-full py-12 md:py-24 lg:py-32">
       <div className="container px-4 md:px-6">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
@@ -34,7 +34,7 @@ function SymptomCheckerCard() {
             title="Symptom Checker"
             description="Enter your symptoms and get AI-powered insights on possible causes. Not a substitute for professional medical advice."
         >
-            <Button asChild variant="outline" className="w-full mt-auto bg-white/30 hover:bg-white/50">
+            <Button asChild variant="outline" className="w-full mt-auto bg-white/30 hover:bg-white/50 text-foreground">
               <Link href="/symptom-checker">Check Symptoms Now</Link>
             </Button>
         </FeatureCard>
@@ -60,7 +60,7 @@ function DoctorFinderCard() {
             title="Nearby Doctor Finder"
             description="Find verified doctors and specialists near you. Filter by specialty, distance, and patient reviews."
         >
-            <Button variant="outline" className="w-full mt-auto bg-white/30 hover:bg-white/50">Find a Doctor</Button>
+            <Button variant="outline" className="w-full mt-auto bg-white/30 hover:bg-white/50 text-foreground">Find a Doctor</Button>
         </FeatureCard>
     );
 }
@@ -72,7 +72,7 @@ function MedicalRecordSharingCard() {
             title="Medical Record Sharing"
             description="Securely upload, store, and share your medical records with healthcare providers in just a few clicks."
         >
-            <Button variant="outline" className="w-full mt-auto bg-white/30 hover:bg-white/50">Share Records</Button>
+            <Button variant="outline" className="w-full mt-auto bg-white/30 hover:bg-white/50 text-foreground">Share Records</Button>
         </FeatureCard>
     );
 }
