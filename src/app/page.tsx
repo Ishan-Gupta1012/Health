@@ -6,15 +6,15 @@ import { Header } from '@/components/header';
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col">
+      <CyberneticGridShader />
       <Header />
       <main className="flex-1">
-        <CyberneticGridShader />
         <div className="relative z-10 flex h-screen flex-col items-center justify-center text-center">
-            <h1 className="text-4xl font-bold tracking-tighter text-foreground sm:text-6xl">
+            <h1 className="text-4xl font-bold tracking-tighter text-gray-800 sm:text-6xl">
                 Your Unified Smart Health Assistant
             </h1>
-            <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
+            <p className="mx-auto max-w-[700px] text-gray-600 md:text-xl mt-4">
                 Smart health tracking, doctor finder, medicine reminders & record sharing — all in one place.
             </p>
         </div>

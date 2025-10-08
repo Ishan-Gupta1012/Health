@@ -75,9 +75,7 @@ const CyberneticGridShader = () => {
         // subtle noise
         color += random(uv + t * 0.1) * 0.05;
         
-        // Final output on white background
-        vec3 blendedColor = mix(vec3(1.0), color, color.b);
-        gl_FragColor = vec4(blendedColor, min(1.0, line * 2.0 + energy + glow));
+        gl_FragColor = vec4(color, min(1.0, (line * 2.0 + energy + glow) * 0.5));
       }
     `;
 
@@ -96,7 +94,7 @@ const CyberneticGridShader = () => {
       fragmentShader,
       uniforms,
       transparent: true,
-      blending: THREE.NormalBlending,
+      blending: THREE.AdditiveBlending,
     });
 
     const geometry = new THREE.PlaneGeometry(2, 2);
@@ -153,12 +151,12 @@ const CyberneticGridShader = () => {
       ref={containerRef}
       className="shader-container"
       style={{
-        position:      'absolute',
+        position:      'fixed',
         top:           0,
         left:          0,
         width:         '100%',
         height:        '100%',
-        zIndex:        0,
+        zIndex:        -1,
         pointerEvents: 'none'
       }}
       aria-label="Cybernetic Grid animated background"
