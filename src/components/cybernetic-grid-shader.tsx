@@ -31,6 +31,8 @@ export const CyberneticGridShader = () => {
       uniform vec2 iResolution;
       uniform float iTime;
       uniform vec2 iMouse;
+      uniform vec3 iColor1;
+      uniform vec3 iColor2;
 
       float random(vec2 st) {
         return fract(sin(dot(st.xy, vec2(12.9898, 78.233)))
@@ -57,7 +59,7 @@ export const CyberneticGridShader = () => {
         float line  = pow(1.0 - min(gridUv.x, gridUv.y), 50.0);
 
         // base grid color pulsing
-        vec3 gridColor = vec3(0.1, 0.5, 1.0);
+        vec3 gridColor = mix(iColor1, iColor2, 0.5 + sin(t * 0.5) * 0.5);
         vec3 color     = gridColor
                        * line
                        * (0.5 + sin(t * 2.0) * 0.2);
@@ -66,7 +68,7 @@ export const CyberneticGridShader = () => {
         float energy = sin(uv.x * 20.0 + t * 5.0)
                      * sin(uv.y * 20.0 + t * 3.0);
         energy = smoothstep(0.8, 1.0, energy);
-        color += vec3(1.0, 0.2, 0.8) * energy * line;
+        color += mix(iColor2, vec3(1.0), 0.5) * energy * line;
 
         // glow around mouse
         float glow = smoothstep(0.1, 0.0, mouseDist);
@@ -86,7 +88,9 @@ export const CyberneticGridShader = () => {
       iMouse:      { value: new THREE.Vector2(
                        window.innerWidth / 2,
                        window.innerHeight / 2
-                     ) }
+                     ) },
+      iColor1:     { value: new THREE.Color(0x0077ff) }, // Blue
+      iColor2:     { value: new THREE.Color(0x00eaff) }  // Cyan
     };
 
     const material = new THREE.ShaderMaterial({
@@ -121,7 +125,7 @@ export const CyberneticGridShader = () => {
     window.addEventListener('mousemove', onMouseMove);
 
     // 6) Animation loop
-    const animationFrame = renderer.setAnimationLoop(() => {
+    const animationFrameId = renderer.setAnimationLoop(() => {
       uniforms.iTime.value = clock.getElapsedTime();
       renderer.render(scene, camera);
     });
@@ -131,11 +135,12 @@ export const CyberneticGridShader = () => {
       window.removeEventListener('resize', onResize);
       window.removeEventListener('mousemove', onMouseMove);
 
-      renderer.setAnimationLoop(null);
+      if(animationFrameId) {
+        renderer.setAnimationLoop(null);
+      }
 
-      const canvas = renderer.domElement;
-      if (canvas.parentNode) {
-        canvas.parentNode.removeChild(canvas);
+      if (renderer.domElement.parentNode) {
+        renderer.domElement.parentNode.removeChild(renderer.domElement);
       }
 
       material.dispose();
