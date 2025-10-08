@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import * as THREE from 'three';
 import { useMemo, useRef, useEffect } from 'react';
@@ -175,29 +175,30 @@ function Plexus() {
         // Update lines
         const positions = lineRef.current.geometry.attributes.position.array as Float32Array;
         let vertexpos = 0;
-        let colorpos = 0;
         
         for (let i = 0; i < count; i++) {
             for (let j = i + 1; j < count; j++) {
                 const p1 = particles[i];
                 const p2 = particles[j];
-                const dist = Math.sqrt(
-                  Math.pow(p1.x + p1.mx - (p2.x + p2.mx), 2) +
-                  Math.pow(p1.y + p1.my - (p2.y + p2.my), 2) +
-                  Math.pow(p1.z - p2.z, 2)
-                );
+                const p1pos = new THREE.Vector3();
+                const p2pos = new THREE.Vector3();
+                const tempMatrix = new THREE.Matrix4();
+                
+                ref.current.getMatrixAt(i, tempMatrix);
+                p1pos.setFromMatrixPosition(tempMatrix);
+
+                ref.current.getMatrixAt(j, tempMatrix);
+                p2pos.setFromMatrixPosition(tempMatrix);
+                
+                const dist = p1pos.distanceTo(p2pos);
 
                 if (dist < 2.5) {
-                    const alpha = 1.0 - dist / 2.5;
-                    const p1pos = ref.current.getMatrixAt(i, new THREE.Matrix4()).elements;
-                    const p2pos = ref.current.getMatrixAt(j, new THREE.Matrix4()).elements;
-
-                    positions[vertexpos++] = p1pos[12];
-                    positions[vertexpos++] = p1pos[13];
-                    positions[vertexpos++] = p1pos[14];
-                    positions[vertexpos++] = p2pos[12];
-                    positions[vertexpos++] = p2pos[13];
-                    positions[vertexpos++] = p2pos[14];
+                    positions[vertexpos++] = p1pos.x;
+                    positions[vertexpos++] = p1pos.y;
+                    positions[vertexpos++] = p1pos.z;
+                    positions[vertexpos++] = p2pos.x;
+                    positions[vertexpos++] = p2pos.y;
+                    positions[vertexpos++] = p2pos.z;
                 }
             }
         }
