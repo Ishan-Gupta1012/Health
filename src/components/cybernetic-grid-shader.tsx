@@ -55,21 +55,21 @@ export const CyberneticGridShader = () => {
         vec2 gridUv = abs(fract(uv * 10.0) - 0.5);
         float line  = pow(1.0 - min(gridUv.x, gridUv.y), 50.0);
 
-        // base grid color pulsing
-        vec3 gridColor = vec3(0.1, 0.5, 1.0);
+        // base grid color pulsing - using a light blue from the new theme
+        vec3 gridColor = vec3(0.7, 0.8, 1.0); // Soft light blue/lavender
         vec3 color     = gridColor
                        * line
                        * (0.5 + sin(t * 2.0) * 0.2);
 
-        // energetic pulses along grid
+        // energetic pulses along grid - using a color related to primary
         float energy = sin(uv.x * 20.0 + t * 5.0)
                      * sin(uv.y * 20.0 + t * 3.0);
         energy = smoothstep(0.8, 1.0, energy);
-        color += vec3(1.0, 0.2, 0.8) * energy * line;
+        color += vec3(0.2, 0.6, 1.0) * energy * line; // Vibrant blue pulse
 
         // glow around mouse
         float glow = smoothstep(0.1, 0.0, mouseDist);
-        color += vec3(1.0) * glow * 0.5;
+        color += vec3(0.9) * glow * 0.5; // Brighter glow for light theme
 
         // subtle noise
         color += random(uv + t * 0.1) * 0.05;
@@ -153,7 +153,7 @@ export const CyberneticGridShader = () => {
         height:        '100vh',
         zIndex:        -10,
         pointerEvents: 'none',
-        opacity: 0.5
+        opacity: 0.15
       }}
       aria-label="Cybernetic Grid animated background"
     />
