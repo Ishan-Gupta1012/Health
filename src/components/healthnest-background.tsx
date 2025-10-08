@@ -39,7 +39,7 @@ function Particles({ count = 20 }) {
       // Parallax effect
       const parallaxFactor = 0.1;
       const parallaxOffset = new THREE.Vector3().copy(target).multiplyScalar(parallaxFactor);
-      const currentPosition = new THREE.Vector3().copy(particle.initialPosition).add(parallaxOffset);
+      const currentPosition = new THREE.Vector3().copy(particle.initialPosition).add( parallaxOffset);
       
       const matrix = new THREE.Matrix4();
       instancedMeshRef.current.getMatrixAt(i, matrix);
@@ -96,9 +96,11 @@ function BackgroundGradient() {
       colorC: '#D6F2F7', // Powder Blue
   });
 
-  materialRef.current?.uniforms.uColorA.value.set(colorA);
-  materialRef.current?.uniforms.uColorB.value.set(colorB);
-  materialRef.current?.uniforms.uColorC.value.set(colorC);
+  if (materialRef.current) {
+    materialRef.current.uniforms.uColorA.value.set(colorA);
+    materialRef.current.uniforms.uColorB.value.set(colorB);
+    materialRef.current.uniforms.uColorC.value.set(colorC);
+  }
 
 
   return (
@@ -138,9 +140,6 @@ function BackgroundGradient() {
 
 
 export function HealthNestBackground() {
-  const isBrowser = typeof window !== 'undefined';
-  
-  // Hide Leva panel in production
   const isProduction = process.env.NODE_ENV === 'production';
 
   return (
@@ -154,17 +153,13 @@ export function HealthNestBackground() {
         zIndex: -1,
       }}
     >
-      {isBrowser && (
-        <>
-        <Leva hidden={isProduction} />
-        <Canvas>
-            <ambientLight intensity={0.5} />
-            <pointLight position={[10, 10, 10]} />
-            <BackgroundGradient />
-            <Particles />
-        </Canvas>
-        </>
-      )}
+      <Leva hidden={isProduction} />
+      <Canvas>
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 10, 10]} />
+          <BackgroundGradient />
+          <Particles />
+      </Canvas>
     </div>
   );
 }
