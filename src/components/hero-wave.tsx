@@ -295,7 +295,7 @@ export function HeroWave({ className, style, extendLeftPx = 320, title = "Build 
 
     function createInstancedMaterial() {
       const baseCol = new THREE.Color("hsl(210, 90%, 60%)");
-      const emisCol = new THREE.Color("#1f3dbc");
+      const emisCol = new THREE.Color("hsl(200, 100%, 50%)");
 
       return new THREE.ShaderMaterial({
         defines: { USE_INSTANCING: "" },
@@ -798,7 +798,7 @@ export function HeroWave({ className, style, extendLeftPx = 320, title = "Build 
         }
       } catch {}
     };
-  }, [extendLeftPx]);
+  }, []);
 
   return (
     <section
@@ -825,10 +825,10 @@ export function HeroWave({ className, style, extendLeftPx = 320, title = "Build 
           className="max-w-3xl w-full text-center"
           style={{ pointerEvents: "auto" }}
         >
-          <h1 className="text-white text-4xl sm:text-6xl font-bold tracking-tight drop-shadow-[0_1px_8px_rgba(31,61,188,0.25)]">
+          <h1 className="text-foreground text-4xl sm:text-6xl font-bold tracking-tight">
             <span className="block">{title}</span>
           </h1>
-          <p className="text-gray-300/90 mt-3 sm:mt-4 text-lg sm:text-xl max-w-xl mx-auto">
+          <p className="text-muted-foreground mt-3 sm:mt-4 text-lg sm:text-xl max-w-xl mx-auto">
             {subtitle}
           </p>
           <form
@@ -839,19 +839,19 @@ export function HeroWave({ className, style, extendLeftPx = 320, title = "Build 
             }}
           >
             <div className="relative w-full sm:w-[720px]">
-              <div className="relative rounded-2xl p-[2px] shadow-[0_1px_2px_0_rgba(0,0,0,0.06)] bg-gradient-to-br from-white/10 via-white/5 to-black/20">
+              <div className="relative rounded-2xl p-[2px] shadow-lg bg-gradient-to-br from-primary/20 via-primary/5 to-transparent">
                 <textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder={animatedPlaceholder}
                   rows={5}
-                  className="w-full h-32 sm:h-36 resize-none rounded-2xl bg-[rgba(15,15,20,0.55)] border border-white/10 text-white placeholder:text-white/40 outline-none focus:ring-2 focus:ring-[#1f3dbc]/40 focus:border-[#1f3dbc]/40 backdrop-blur-md px-4 py-4 pr-16"
+                  className="w-full h-32 sm:h-36 resize-none rounded-xl bg-background/80 border border-border text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 backdrop-blur-sm px-4 py-4 pr-16"
                 />
               </div>
               <button
                 type="submit"
                 aria-label={buttonText}
-                className="absolute right-3 bottom-3 inline-flex items-center justify-center w-10 h-10 rounded-xl bg-[#f0f2ff] text-black hover:bg-white transition-colors"
+                className="absolute right-3 bottom-3 inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                   <path d="M7 17L17 7"/>
