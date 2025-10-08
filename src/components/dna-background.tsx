@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { useMemo, useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Trail, Float } from '@react-three/drei';
+import { Float } from '@react-three/drei';
 import { Leva, useControls } from 'leva';
 
 function DNA() {
@@ -151,6 +151,7 @@ function Plexus() {
     const lineRef = useRef<THREE.LineSegments>(null!);
 
     useFrame(({ mouse }) => {
+        if (!ref.current || !lineRef.current) return;
         particles.forEach((particle, i) => {
             let { t, factor, speed, x, y, z } = particle;
             t = particle.t += speed / 2;
@@ -192,12 +193,14 @@ function Plexus() {
                 const dist = p1pos.distanceTo(p2pos);
 
                 if (dist < 2.5) {
-                    positions[vertexpos++] = p1pos.x;
-                    positions[vertexpos++] = p1pos.y;
-                    positions[vertexpos++] = p1pos.z;
-                    positions[vertexpos++] = p2pos.x;
-                    positions[vertexpos++] = p2pos.y;
-                    positions[vertexpos++] = p2pos.z;
+                    if (vertexpos < positions.length - 6) {
+                      positions[vertexpos++] = p1pos.x;
+                      positions[vertexpos++] = p1pos.y;
+                      positions[vertexpos++] = p1pos.z;
+                      positions[vertexpos++] = p2pos.x;
+                      positions[vertexpos++] = p2pos.y;
+                      positions[vertexpos++] = p2pos.z;
+                    }
                 }
             }
         }
