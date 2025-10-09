@@ -12,7 +12,7 @@ export function FeaturesSection() {
           <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
             A Suite of Smart Health Tools
           </h2>
-          <p className="mt-4 text-muted-foreground md:text-xl/relaxed">
+          <p className="mt-4 text-gray-100 md:text-xl/relaxed">
             From checking your symptoms to managing your health records, HealthNest has you covered.
           </p>
         </div>

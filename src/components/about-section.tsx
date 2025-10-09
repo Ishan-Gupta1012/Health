@@ -8,7 +8,7 @@ export function AboutSection() {
                 <div className="space-y-3 flex flex-col items-center">
                     <HeartbeatAnimation />
                     <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">About HealthNest</h2>
-                    <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                    <p className="mx-auto max-w-[700px] text-gray-200 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                         Our mission is to empower individuals with AI-driven tools for preventive care, fostering better patient-doctor connections and making healthcare management seamless and accessible for everyone.
                     </p>
                 </div>
