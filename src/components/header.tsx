@@ -31,7 +31,7 @@ export function Header() {
           <span className="font-bold text-lg">HealthNest</span>
         </Link>
         <nav className="hidden md:flex flex-1 items-center justify-center space-x-8 text-sm font-medium">
-          <Link href="/#features" data-scroll-to className="transition-colors hover:text-primary">Features</Link>
+          <Link href="/#home" data-scroll-to className="transition-colors hover:text-primary">Home</Link>
           <Link href="/#about" data-scroll-to className="transition-colors hover:text-primary">About</Link>
           <Link href="/#contact" data-scroll-to className="transition-colors hover:text-primary">Contact</Link>
         </nav>
@@ -66,7 +66,7 @@ export function Header() {
                   <span className="font-bold">HealthNest</span>
                 </Link>
                 <nav className="grid gap-2">
-                  <Link href="/#features" data-scroll-to className="text-muted-foreground hover:text-foreground">Features</Link>
+                  <Link href="/#home" data-scroll-to className="text-muted-foreground hover:text-foreground">Home</Link>
                   <Link href="/#about" data-scroll-to className="text-muted-foreground hover:text-foreground">About</Link>
                   <Link href="/#contact" data-scroll-to className="text-muted-foreground hover:text-foreground">Contact</Link>
                 </nav>

@@ -18,7 +18,7 @@ import {
   DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Sparkles, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { LoadingStethoscope } from '@/components/loading-stethoscope';
 import { symptomChecker, type SymptomCheckerOutput } from '@/ai/flows/symptom-checker';
 

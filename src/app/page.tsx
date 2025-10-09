@@ -22,7 +22,7 @@ export default function Home() {
             </p>
             <div className="flex gap-4 mt-8">
               <Button size="lg" asChild className="neon-shadow-primary-hover">
-                <a href="#features" data-scroll-to>Get Started</a>
+                <a href="#home" data-scroll-to>Get Started</a>
               </Button>
               <Button size="lg" variant="outline" className="bg-white/20">
                 Learn More
