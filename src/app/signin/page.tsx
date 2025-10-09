@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Header } from '@/components/header';
+import Spline from '@splinetool/react-spline/next';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -97,13 +98,9 @@ export default function SignInPage() {
     <div className="relative min-h-screen w-full">
       <Header />
        <div className="absolute inset-0 z-0">
-          <iframe 
-            src='https://my.spline.design/community/file/e4d95e57-1640-4fbd-a09b-1827d1d6b193' 
-            frameBorder='0' 
-            width='100%' 
-            height='100%'
-            style={{ outline: 'none', border: 'none' }}
-          ></iframe>
+          <Spline
+            scene="https://prod.spline.design/i-g2FwAFy6bZANvB/scene.splinecode" 
+          />
       </div>
       <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
         <Card className="w-full max-w-sm glass-card">
