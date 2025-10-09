@@ -11,11 +11,14 @@ export default function Home() {
   return (
     <>
       <Header />
+      <div className="wave"></div>
+      <div className="wave"></div>
+      <div className="wave"></div>
       <SmoothScroll>
         <div data-scroll-section>
-           <div className="relative flex h-screen flex-col items-center justify-center text-center px-4" data-bgcolor="#f5f5f5" data-textcolor="#111827">
+           <div className="relative flex h-screen flex-col items-center justify-center text-center px-4">
             <div className="relative z-10">
-              <h1 className="text-4xl font-bold tracking-tighter sm:text-6xl" style={{ zIndex: 2, lineHeight: 1.2 }}>
+              <h1 className="text-4xl font-bold tracking-tighter sm:text-6xl text-gray-800" style={{ zIndex: 2, lineHeight: 1.2 }}>
                 Your Unified Smart Health Assistant
               </h1>
               <p className="mx-auto max-w-[700px] text-gray-800 md:text-xl mt-4">
@@ -30,18 +33,15 @@ export default function Home() {
                 </Button>
               </div>
             </div>
-            <div className="wave"></div>
-            <div className="wave"></div>
-            <div className="wave"></div>
           </div>
         </div>
-        <div data-scroll-section data-bgcolor="#CCCCFF" data-textcolor="#111827">
+        <div data-scroll-section>
           <FeaturesSection />
         </div>
-        <div data-scroll-section data-bgcolor="#FFB6C1" data-textcolor="#111827">
+        <div data-scroll-section>
           <AboutSection />
         </div>
-        <div data-scroll-section data-bgcolor="#FF7F50" data-textcolor="#111827">
+        <div data-scroll-section>
           <Footer />
         </div>
       </SmoothScroll>
