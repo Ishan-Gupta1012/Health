@@ -55,7 +55,6 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       const scrollColorElems = document.querySelectorAll('[data-bgcolor]');
       scrollColorElems.forEach((colorSection, i) => {
         const prevBg = i === 0 ? '' : (scrollColorElems[i - 1] as HTMLElement).dataset.bgcolor;
-        const prevText = i === 0 ? '' : (scrollColorElems[i - 1] as HTMLElement).dataset.textcolor;
 
         ScrollTrigger.create({
           trigger: colorSection,
@@ -64,13 +63,11 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
           onEnter: () =>
             gsap.to('body', {
               backgroundColor: (colorSection as HTMLElement).dataset.bgcolor,
-              color: (colorSection as HTMLElement).dataset.textcolor,
               overwrite: 'auto',
             }),
           onLeaveBack: () =>
             gsap.to('body', {
               backgroundColor: prevBg,
-              color: prevText,
               overwrite: 'auto',
             }),
         });
