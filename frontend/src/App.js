@@ -23,7 +23,7 @@ import useAuthHook from './hooks/useAuth';
 import { checkBackendHealth } from './utils/api';
 
 function App() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuthHook();
   const [backendStatus, setBackendStatus] = useState('checking');
   const [loading, setLoading] = useState(true);
 
