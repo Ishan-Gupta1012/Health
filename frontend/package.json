@@ -10,15 +10,15 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
+    "axios": "^1.6.2",
+    "date-fns": "^2.30.0",
+    "framer-motion": "^10.16.16",
+    "lucide-react": "^0.300.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.8.1",
-    "react-scripts": "^5.0.1",
-    "axios": "^1.6.2",
-    "lucide-react": "^0.300.0",
-    "framer-motion": "^10.16.16",
     "react-hook-form": "^7.48.2",
-    "date-fns": "^2.30.0"
+    "react-router-dom": "^6.8.1",
+    "react-scripts": "^5.0.1"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.16",

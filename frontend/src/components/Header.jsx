@@ -40,7 +40,7 @@ const Header = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200">
+    <header className="sticky top-0 z-50 bg-white/10 backdrop-blur-md border-b border-white/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -63,8 +63,8 @@ const Header = () => {
                 to={item.path}
                 className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition-all duration-200 ${
                   isActive(item.path)
-                    ? 'bg-primary-50 text-primary-700 font-medium'
-                    : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
+                    ? 'bg-white/20 text-white font-medium'
+                    : 'text-white/80 hover:text-white hover:bg-white/10'
                 }`}
                 data-testid={`nav-${item.name.toLowerCase().replace(' ', '-')}`}
               >
@@ -80,17 +80,17 @@ const Header = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 transition-colors"
                   data-testid="user-profile-button"
                 >
-                  <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
                     {user.avatar ? (
                       <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full" />
                     ) : (
                       <User className="h-4 w-4 text-white" />
                     )}
                   </div>
-                  <span className="text-sm font-medium text-gray-700 hidden md:block">
+                  <span className="text-sm font-medium text-white hidden md:block">
                     {user.name}
                   </span>
                 </button>
@@ -101,12 +101,12 @@ const Header = () => {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2"
+                    className="absolute right-0 mt-2 w-48 bg-white/10 backdrop-blur-md rounded-lg shadow-lg border border-white/20 py-2"
                     data-testid="profile-dropdown"
                   >
                     <Link
                       to="/profile"
-                      className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                      className="flex items-center space-x-2 px-4 py-2 text-white/80 hover:bg-white/20"
                       onClick={() => setIsProfileOpen(false)}
                       data-testid="profile-link"
                     >
@@ -115,7 +115,7 @@ const Header = () => {
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="flex items-center space-x-2 w-full px-4 py-2 text-red-600 hover:bg-red-50"
+                      className="flex items-center space-x-2 w-full px-4 py-2 text-red-400 hover:bg-red-500/20"
                       data-testid="logout-button"
                     >
                       <LogOut className="h-4 w-4" />
@@ -139,13 +139,13 @@ const Header = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-50 transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
               data-testid="mobile-menu-button"
             >
               {isMenuOpen ? (
-                <X className="h-6 w-6 text-gray-600" />
+                <X className="h-6 w-6 text-white" />
               ) : (
-                <Menu className="h-6 w-6 text-gray-600" />
+                <Menu className="h-6 w-6 text-white" />
               )}
             </button>
           </div>
@@ -157,7 +157,7 @@ const Header = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden border-t border-gray-200 bg-white"
+            className="lg:hidden border-t border-white/20 bg-white/10 backdrop-blur-md"
             data-testid="mobile-menu"
           >
             <nav className="py-4 space-y-2">
@@ -167,8 +167,8 @@ const Header = () => {
                   to={item.path}
                   className={`flex items-center space-x-3 px-4 py-3 text-base font-medium transition-colors ${
                     isActive(item.path)
-                      ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-500'
-                      : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
+                      ? 'bg-white/20 text-white border-r-2 border-green-400'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                   data-testid={`mobile-nav-${item.name.toLowerCase().replace(' ', '-')}`}
@@ -180,7 +180,7 @@ const Header = () => {
               {!user && (
                 <Link
                   to="/signin"
-                  className="flex items-center space-x-3 px-4 py-3 text-base font-medium text-gray-600 hover:text-primary-600 hover:bg-gray-50"
+                  className="flex items-center space-x-3 px-4 py-3 text-base font-medium text-white/80 hover:text-white hover:bg-white/10"
                   onClick={() => setIsMenuOpen(false)}
                   data-testid="mobile-signin-button"
                 >

@@ -45,7 +45,7 @@ function App() {
 
   if (loading || authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="large" />
       </div>
     );
@@ -53,14 +53,14 @@ function App() {
 
   if (backendStatus === 'disconnected') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center p-8">
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center p-8 glass-card">
           <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Backend Connection Failed</h1>
-          <p className="text-gray-600 mb-4">
+          <h1 className="text-2xl font-bold text-white mb-4">Backend Connection Failed</h1>
+          <p className="text-white/80 mb-4">
             Unable to connect to the HealthNest backend server.
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-white/70">
             Please ensure the backend server is running on port 8001
           </p>
           <button 
@@ -76,110 +76,21 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen">
         <Header />
-        <AnimatePresence mode="wait">
-          <Routes>
-            <Route 
-              path="/" 
-              element={
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Home />
-                </motion.div>
-              } 
-            />
-            <Route 
-              path="/signin" 
-              element={
-                user ? <Navigate to="/" /> : 
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <SignIn />
-                </motion.div>
-              } 
-            />
-            <Route 
-              path="/symptom-checker" 
-              element={
-                <motion.div
-                  initial={{ opacity: 0, x: 100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -100 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <SymptomChecker />
-                </motion.div>
-              } 
-            />
-            <Route 
-              path="/doctor-finder" 
-              element={
-                <motion.div
-                  initial={{ opacity: 0, x: 100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -100 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <DoctorFinder />
-                </motion.div>
-              } 
-            />
-            <Route 
-              path="/medicine-reminders" 
-              element={
-                user ? 
-                <motion.div
-                  initial={{ opacity: 0, x: 100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -100 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <MedicineReminders />
-                </motion.div> : 
-                <Navigate to="/signin" />
-              } 
-            />
-            <Route 
-              path="/medical-records" 
-              element={
-                user ? 
-                <motion.div
-                  initial={{ opacity: 0, x: 100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -100 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <MedicalRecords />
-                </motion.div> : 
-                <Navigate to="/signin" />
-              } 
-            />
-            <Route 
-              path="/profile" 
-              element={
-                user ? 
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Profile />
-                </motion.div> : 
-                <Navigate to="/signin" />
-              } 
-            />
-          </Routes>
-        </AnimatePresence>
+        <main>
+          <AnimatePresence mode="wait">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/signin" element={user ? <Navigate to="/" /> : <SignIn />} />
+              <Route path="/symptom-checker" element={<SymptomChecker />} />
+              <Route path="/doctor-finder" element={<DoctorFinder />} />
+              <Route path="/medicine-reminders" element={user ? <MedicineReminders /> : <Navigate to="/signin" />} />
+              <Route path="/medical-records" element={user ? <MedicalRecords /> : <Navigate to="/signin" />} />
+              <Route path="/profile" element={user ? <Profile /> : <Navigate to="/signin" />} />
+            </Routes>
+          </AnimatePresence>
+        </main>
         <Footer />
       </div>
     </Router>
