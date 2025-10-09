@@ -1,0 +1,119 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-gray-50 text-gray-900 font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .wave {
+    @apply absolute inset-0 opacity-30;
+    background: linear-gradient(45deg, rgba(60, 179, 113, 0.1), rgba(135, 206, 235, 0.1));
+    border-radius: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    animation: wave 6s ease-in-out infinite;
+  }
+  
+  .wave:nth-child(2) {
+    animation-delay: 2s;
+    @apply opacity-20;
+  }
+  
+  .wave:nth-child(3) {
+    animation-delay: 4s;
+    @apply opacity-10;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105;
+  }
+  
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-primary-600 border border-primary-500 font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105;
+  }
+  
+  .neon-shadow-primary-hover {
+    transition: all 0.3s ease;
+  }
+  
+  .neon-shadow-primary-hover:hover {
+    box-shadow: 0 0 20px rgba(60, 179, 113, 0.4);
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-lg border border-gray-100 p-6 transition-all duration-200 hover:shadow-xl hover:border-primary-200;
+  }
+  
+  .input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+  }
+  
+  .loading {
+    @apply animate-pulse;
+  }
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: translateX(-50%) translateY(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-50%) scale(1.1);
+  }
+}
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.heartbeat {
+  animation: heartbeat 2s ease-in-out infinite;
+}
+
+.gradient-text {
+  background: linear-gradient(45deg, #3CB371, #87CEEB);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glass {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3CB371;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2a8b5f;
+}
