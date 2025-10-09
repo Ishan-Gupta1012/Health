@@ -33,7 +33,7 @@ export default function Home() {
         <div data-scroll-section data-bgcolor="#3CB371" data-textcolor="#ffffff">
           <FeaturesSection />
         </div>
-        <div data-scroll-section data-bgcolor="#87CEEB" data-textcolor="#111827">
+        <div data-scroll-section data-bgcolor="#4682B4" data-textcolor="#ffffff">
           <AboutSection />
         </div>
         <div data-scroll-section data-bgcolor="#1c1c1e" data-textcolor="#ffffff">
