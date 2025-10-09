@@ -98,7 +98,7 @@ export default function SignInPage() {
       <Header />
        <div className="absolute inset-0 z-0">
           <iframe 
-            src='https://my.spline.design/e4d95e57-1640-4fbd-a09b-1827d1d6b193/' 
+            src='https://my.spline.design/community/file/e4d95e57-1640-4fbd-a09b-1827d1d6b193' 
             frameBorder='0' 
             width='100%' 
             height='100%'
