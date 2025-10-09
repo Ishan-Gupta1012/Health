@@ -72,7 +72,7 @@ const { router: authRoutes } = require('./routes/auth');
 const doctorRoutes = require('./routes/doctors');
 const symptomRoutes = require('./routes/symptoms');
 const reminderRoutes = require('./routes/reminders');
-const recordRoutes = require('./routes/records');
+// const recordRoutes = require('./routes/records');
 
 // Use routes
 app.use('/api/auth', authRoutes);
