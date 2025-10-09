@@ -22,7 +22,7 @@ export function FeatureCard({ icon, title, description, children, className }: F
         </div>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col justify-between pt-0">
-        <CardDescription className="mb-4">{description}</CardDescription>
+        <CardDescription className="mb-4 text-card-foreground">{description}</CardDescription>
         {children}
       </CardContent>
     </Card>
