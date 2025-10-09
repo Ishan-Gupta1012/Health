@@ -99,7 +99,7 @@ export default function SignInPage() {
       <Header />
        <div className="absolute inset-0 z-0">
           <Spline
-            scene="https://prod.spline.design/i-g2FwAFy6bZANvB/scene.splinecode" 
+            scene="https://prod.spline.design/FpV4oHxEGuzUlg-v/scene.splinecode" 
           />
       </div>
       <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
