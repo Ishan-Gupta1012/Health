@@ -12,9 +12,9 @@ interface FeatureCardProps {
 
 export function FeatureCard({ icon, title, description, children, className }: FeatureCardProps) {
   return (
-    <Card className={cn("flex h-full flex-col overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1 glass-card neon-shadow-primary-hover", className)}>
+    <Card className={cn("group flex h-full flex-col overflow-hidden transition-all hover:-translate-y-1 glass-card neon-shadow-dark-hover", className)}>
       <CardHeader className="flex flex-row items-start gap-4 space-y-0 pb-4">
-        <div className="rounded-lg bg-primary/10 p-3 text-primary" style={{ filter: 'drop-shadow(0 0 5px hsl(var(--primary)))' }}>
+        <div className="rounded-lg bg-primary/10 p-3 text-primary transition-shadow group-hover:shadow-[0_0_15px_hsl(var(--primary)/0.8)]">
           {icon}
         </div>
         <div className="flex-1">
