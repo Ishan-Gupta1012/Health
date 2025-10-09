@@ -44,14 +44,6 @@ export default function SignInPage() {
   const router = useRouter();
   const auth = getAuth();
 
-  const form = useForm<UserFormValue>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
   const onSubmit = async (data: UserFormValue) => {
     setLoading(true);
     setError(null);
