@@ -30,13 +30,13 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div data-scroll-section data-bgcolor="#3CB371" data-textcolor="#ffffff">
+        <div data-scroll-section data-bgcolor="#CCCCFF" data-textcolor="#111827">
           <FeaturesSection />
         </div>
-        <div data-scroll-section data-bgcolor="#4682B4" data-textcolor="#ffffff">
+        <div data-scroll-section data-bgcolor="#FFB6C1" data-textcolor="#111827">
           <AboutSection />
         </div>
-        <div data-scroll-section data-bgcolor="#1c1c1e" data-textcolor="#ffffff">
+        <div data-scroll-section data-bgcolor="#FF7F50" data-textcolor="#ffffff">
           <Footer />
         </div>
       </SmoothScroll>
