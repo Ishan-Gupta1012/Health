@@ -79,7 +79,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/symptoms', symptomRoutes);
 app.use('/api/reminders', reminderRoutes);
-// app.use('/api/records', recordRoutes);
+app.use('/api/records', recordRoutes);
 
 // File uploads directory
 app.use('/api/uploads', express.static('uploads'));
