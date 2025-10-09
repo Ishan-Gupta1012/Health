@@ -129,7 +129,7 @@ router.get('/', verifyToken, async (req, res) => {
 
 // Get record by ID
 router.get('/:recordId', verifyToken, async (req, res) => {
-  try {{
+  try {
     const record = await MedicalRecord.findOne({ 
       recordId: req.params.recordId,
       userId: req.userId 
