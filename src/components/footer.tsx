@@ -7,7 +7,7 @@ import { Label } from './ui/label';
 
 export function Footer() {
     return (
-        <footer id="contact" className="w-full border-t bg-background py-12 md:py-24 lg:py-32">
+        <footer id="contact" className="w-full bg-transparent py-12 md:py-24 lg:py-32">
             <div className="container grid max-w-6xl grid-cols-1 gap-12 px-4 md:grid-cols-2 md:px-6">
                 <div className="space-y-4">
                     <div className="flex items-center space-x-2">
