@@ -1,3 +1,6 @@
+
+'use client';
+
 import Link from 'next/link';
 import { Stethoscope, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -5,9 +8,21 @@ import {
   Sheet,
   SheetContent,
   SheetTrigger,
-} from "@/components/ui/sheet"
+} from "@/components/ui/sheet";
+import { useUser } from '@/firebase';
+import { getAuth, signOut } from 'firebase/auth';
 
 export function Header() {
+  const { user, isUserLoading } = useUser();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(getAuth());
+    } catch (error) {
+      console.error("Error signing out: ", error);
+    }
+  };
+
   return (
     <header className="fixed top-0 z-50 w-full bg-transparent">
       <div className="container flex h-16 items-center px-4 md:px-6">
@@ -21,8 +36,22 @@ export function Header() {
           <Link href="/#contact" data-scroll-to className="transition-colors hover:text-primary">Contact</Link>
         </nav>
         <div className="flex items-center justify-end space-x-4 ml-auto">
-          <Button variant="ghost" className="hidden md:inline-flex">Sign In</Button>
-          <Button className="hidden md:inline-flex">Get Started</Button>
+          {!isUserLoading && (
+            user ? (
+              <>
+                <Button variant="ghost" onClick={handleSignOut} className="hidden md:inline-flex">Sign Out</Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" asChild className="hidden md:inline-flex">
+                  <Link href="/signin">Sign In</Link>
+                </Button>
+                <Button asChild className="hidden md:inline-flex">
+                  <Link href="/signin">Get Started</Link>
+                </Button>
+              </>
+            )
+          )}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="md:hidden">
@@ -42,8 +71,18 @@ export function Header() {
                   <Link href="/#contact" data-scroll-to className="text-muted-foreground hover:text-foreground">Contact</Link>
                 </nav>
                  <div className="flex flex-col gap-2">
-                    <Button>Get Started</Button>
-                    <Button variant="ghost">Sign In</Button>
+                    {user ? (
+                      <Button onClick={handleSignOut}>Sign Out</Button>
+                    ) : (
+                      <>
+                        <Button asChild>
+                          <Link href="/signin">Get Started</Link>
+                        </Button>
+                        <Button variant="ghost" asChild>
+                          <Link href="/signin">Sign In</Link>
+                        </Button>
+                      </>
+                    )}
                 </div>
               </div>
             </SheetContent>
