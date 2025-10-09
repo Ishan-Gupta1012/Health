@@ -149,7 +149,7 @@
     margin: auto;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     overflow: auto;
-    background: linear-gradient(315deg, #48bfe3 3%, #678D99 38%, #ffb6c1 68%, #ccccff 98%);
+    background: linear-gradient(315deg, #48bfe3 3%, #678D99 38%, #ffb6c1 68%, #e6e6ff 98%);
     animation: gradient 15s ease infinite;
     background-size: 400% 400%;
     background-attachment: fixed;
@@ -190,7 +190,7 @@
   }
   
   .neon-shadow-primary-hover:hover {
-    box-shadow: 0 0 15px hsl(var(--primary) / 0.8);
+    box-shadow: 0 0 15px hsl(0 0% 100% / 0.8);
   }
 
   .neon-shadow-dark-hover:hover {
