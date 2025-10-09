@@ -17,7 +17,7 @@ import MedicalRecords from './pages/MedicalRecords';
 import Profile from './pages/Profile';
 
 // Hooks
-import { useAuth } from './hooks/useAuth';
+import useAuthHook from './hooks/useAuth';
 
 // Utils
 import { checkBackendHealth } from './utils/api';
