@@ -9,7 +9,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInAnonymously } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Card,
   CardContent,
@@ -27,8 +26,6 @@ import {
 } from '@/components/ui/form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Header } from '@/components/header';
-import Link from 'next/link';
-import { Stethoscope } from 'lucide-react';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -43,6 +40,14 @@ export default function SignInPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const router = useRouter();
   const auth = getAuth();
+
+  const form = useForm<UserFormValue>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
   const onSubmit = async (data: UserFormValue) => {
     setLoading(true);
