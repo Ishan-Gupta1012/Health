@@ -27,6 +27,8 @@ import {
 } from '@/components/ui/form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Header } from '@/components/header';
+import Link from 'next/link';
+import { Stethoscope } from 'lucide-react';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -83,7 +85,16 @@ export default function SignInPage() {
   return (
     <div className="relative min-h-screen w-full">
       <Header />
-      <div className="flex items-center justify-center min-h-screen px-4">
+       <div className="absolute inset-0 z-0">
+          <iframe 
+            src='https://my.spline.design/e4d95e57-1640-4fbd-a09b-1827d1d6b193/' 
+            frameBorder='0' 
+            width='100%' 
+            height='100%'
+            style={{ outline: 'none', border: 'none' }}
+          ></iframe>
+      </div>
+      <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
         <Card className="w-full max-w-sm glass-card">
           <CardHeader>
             <CardTitle className="text-2xl">{isSignUp ? 'Create an account' : 'Sign In'}</CardTitle>
@@ -136,7 +147,7 @@ export default function SignInPage() {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
+                <span className="bg-card px-2 text-muted-foreground">
                   Or continue with
                 </span>
               </div>
