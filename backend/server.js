@@ -68,7 +68,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Import routes
-const authRoutes = require('./routes/auth');
+const { router: authRoutes } = require('./routes/auth');
 const doctorRoutes = require('./routes/doctors');
 const symptomRoutes = require('./routes/symptoms');
 const reminderRoutes = require('./routes/reminders');
