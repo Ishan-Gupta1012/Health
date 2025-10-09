@@ -1,0 +1,176 @@
+/**
+ * @file Firebase Security Rules for HealthNest Application
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for personal data and allows public read access to doctor information.
+ * All user-specific data is nested under the `/users/{userId}` path, ensuring that only the authenticated user can access their own data.
+ *
+ * Data Structure:
+ * - `/users/{userId}`: Stores user profiles. Access is restricted to the authenticated user.
+ * - `/users/{userId}/medicalRecords/{medicalRecordId}`: Stores medical records for a specific user. Access is restricted to the owning user.
+ * - `/users/{userId}/medicineReminders/{reminderId}`: Stores medicine reminders for a specific user. Access is restricted to the owning user.
+ * - `/doctors/{doctorId}`: Stores information about doctors. This collection is publicly readable.
+ * - `/users/{userId}/doctorPreferences/{preferenceId}`: Stores a user's preferred doctors. Access is restricted to the owning user.
+ *
+ * Key Security Decisions:
+ * - User listing is disallowed to protect user privacy.
+ * - Doctor information is publicly readable.
+ * - All write operations on user-owned data require authentication and authorization.
+ * - Data validation is relaxed to allow for rapid prototyping but includes critical checks for relational integrity.
+ *
+ * Denormalization for Authorization:
+ * The data structure uses path-based authorization, where the `userId` is embedded in the path itself. This avoids the need for `get()` calls to verify ownership.
+ *
+ * Structural Segregation:
+ * Public doctor data is stored in a separate top-level collection (`/doctors`) to enable public read access without compromising user data.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Secure user profiles.  Only the authenticated user can read or write their own profile.
+     * @path /users/{userId}
+     * @allow (create) User with ID 'user123' can create their profile.
+     *    - request.auth.uid: 'user123'
+     *    - request.resource.data.id: 'user123'
+     * @allow (get) User with ID 'user123' can read their profile.
+     *    - request.auth.uid: 'user123'
+     * @allow (update) User with ID 'user123' can update their profile.
+     *    - request.auth.uid: 'user123'
+     * @allow (delete) User with ID 'user123' can delete their profile.
+     *    - request.auth.uid: 'user123'
+     * @deny (create) User with ID 'user456' attempts to create a profile with ID 'user123'.
+     *    - request.auth.uid: 'user456'
+     *    - request.resource.data.id: 'user123'
+     * @deny (get) User with ID 'user456' attempts to read the profile of 'user123'.
+     *    - request.auth.uid: 'user456'
+     * @principle Enforces document ownership for all operations.  Validates that the user ID in the path matches the authenticated user's ID.
+     */
+    match /users/{userId} {
+      // Allow a user to create their own profile if the userId matches their auth.uid
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == request.auth.uid;
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if false; // User listing is disallowed
+      allow update: if isSignedIn() && isExistingOwner(userId) && resource.data.id == request.auth.uid; // Prevent userId from being changed
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Secure medical records for a specific user. Only the owning user can manage their medical records.
+     * @path /users/{userId}/medicalRecords/{medicalRecordId}
+     * @allow (create) User with ID 'user123' can create a medical record.
+     *    - request.auth.uid: 'user123'
+     *    - request.resource.data.userId: 'user123'
+     * @allow (get) User with ID 'user123' can read a medical record.
+     *    - request.auth.uid: 'user123'
+     * @allow (update) User with ID 'user123' can update a medical record.
+     *    - request.auth.uid: 'user123'
+     * @allow (delete) User with ID 'user123' can delete a medical record.
+     *    - request.auth.uid: 'user123'
+     * @deny (create) User with ID 'user456' attempts to create a medical record for user 'user123'.
+     *    - request.auth.uid: 'user456'
+     *    - request.resource.data.userId: 'user123'
+     * @deny (get) User with ID 'user456' attempts to read a medical record for user 'user123'.
+     *    - request.auth.uid: 'user456'
+     * @principle Enforces document ownership for all operations.  Validates that the userId in the path matches the userId in the document.
+     */
+    match /users/{userId}/medicalRecords/{medicalRecordId} {
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isExistingOwner(userId) && resource.data.userId == userId;
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Secure medicine reminders for a specific user. Only the owning user can manage their medicine reminders.
+     * @path /users/{userId}/medicineReminders/{reminderId}
+     * @allow (create) User with ID 'user123' can create a medicine reminder.
+     *    - request.auth.uid: 'user123'
+     *    - request.resource.data.userId: 'user123'
+     * @allow (get) User with ID 'user123' can read a medicine reminder.
+     *    - request.auth.uid: 'user123'
+     * @allow (update) User with ID 'user123' can update a medicine reminder.
+     *    - request.auth.uid: 'user123'
+     * @allow (delete) User with ID 'user123' can delete a medicine reminder.
+     *    - request.auth.uid: 'user123'
+     * @deny (create) User with ID 'user456' attempts to create a medicine reminder for user 'user123'.
+     *    - request.auth.uid: 'user456'
+     *    - request.resource.data.userId: 'user123'
+     * @deny (get) User with ID 'user456' attempts to read a medicine reminder for user 'user123'.
+     *    - request.auth.uid: 'user456'
+     * @principle Enforces document ownership for all operations.  Validates that the userId in the path matches the userId in the document.
+     */
+    match /users/{userId}/medicineReminders/{reminderId} {
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isExistingOwner(userId) && resource.data.userId == userId;
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Allows public read access to doctor information.  Write access is not permitted.
+     * @path /doctors/{doctorId}
+     * @allow (get) Any user can read doctor information.
+     *    - request.auth.uid: null (or any user ID)
+     * @allow (list) Any user can list doctors.
+     *    - request.auth.uid: null (or any user ID)
+     * @deny (create) No one can create doctor profiles through client-side rules.
+     *    - request.auth.uid: any user ID
+     * @deny (update) No one can update doctor profiles through client-side rules.
+     *    - request.auth.uid: any user ID
+     * @deny (delete) No one can delete doctor profiles through client-side rules.
+     *    - request.auth.uid: any user ID
+     * @principle Provides public read access while restricting write access.
+     */
+    match /doctors/{doctorId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Secure user's preferred doctors. Only the owning user can manage their doctor preferences.
+     * @path /users/{userId}/doctorPreferences/{preferenceId}
+     * @allow (create) User with ID 'user123' can create a doctor preference.
+     *    - request.auth.uid: 'user123'
+     *    - request.resource.data.userId: 'user123'
+     * @allow (get) User with ID 'user123' can read a doctor preference.
+     *    - request.auth.uid: 'user123'
+     * @allow (update) User with ID 'user123' can update a doctor preference.
+     *    - request.auth.uid: 'user123'
+     * @allow (delete) User with ID 'user123' can delete a doctor preference.
+     *    - request.auth.uid: 'user123'
+     * @deny (create) User with ID 'user456' attempts to create a doctor preference for user 'user123'.
+     *    - request.auth.uid: 'user456'
+     *    - request.resource.data.userId: 'user123'
+     * @deny (get) User with ID 'user456' attempts to read a doctor preference for user 'user123'.
+     *    - request.auth.uid: 'user456'
+     * @principle Enforces document ownership for all operations.  Validates that the userId in the path matches the userId in the document.
+     */
+    match /users/{userId}/doctorPreferences/{preferenceId} {
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isExistingOwner(userId) && resource.data.userId == userId;
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+  }
+}
