@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInAnonymously } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInAnonymously, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -71,6 +71,20 @@ export default function SignInPage() {
     setError(null);
     try {
       await signInAnonymously(auth);
+      router.push('/');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
       router.push('/');
     } catch (err: any) {
       setError(err.message);
@@ -149,6 +163,10 @@ export default function SignInPage() {
                 </span>
               </div>
             </div>
+            <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading}>
+                <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 381.5 512 244 512 109.8 512 0 402.2 0 256S109.8 0 244 0c70.3 0 132.3 28.5 176.2 74.2L354.4 139.9C326.6 114.6 289.3 96 244 96c-88.6 0-160.2 71.9-160.2 160s71.6 160 160.2 160c97.4 0 139.2-86.2 143.8-124.2H244v-79.2h244c2.6 14 4.2 28.4 4.2 43z"></path></svg>
+                Sign in with Google
+            </Button>
             <Button variant="outline" className="w-full" onClick={handleAnonymousSignIn} disabled={loading}>
               Sign in Anonymously
             </Button>
