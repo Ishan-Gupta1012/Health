@@ -13,24 +13,26 @@ export default function Home() {
       <Header />
       <SmoothScroll>
         <div data-scroll-section>
-           <div className="relative z-10 flex h-screen flex-col items-center justify-center text-center px-4" data-bgcolor="#f5f5f5" data-textcolor="#111827">
-            <div className="wave"></div>
-            <div className="wave"></div>
-            <div className="wave"></div>
-            <h1 className="text-4xl font-bold tracking-tighter sm:text-6xl" style={{ zIndex: 2, lineHeight: 1.2 }}>
-              Your Unified Smart Health Assistant
-            </h1>
-            <p className="mx-auto max-w-[700px] text-gray-800 md:text-xl mt-4">
-              Smart health tracking, doctor finder, medicine reminders & record sharing — all in one place.
-            </p>
-            <div className="flex gap-4 mt-8">
-              <Button size="lg" asChild className="neon-shadow-primary-hover">
-                <a href="#home" data-scroll-to>Get Started</a>
-              </Button>
-              <Button size="lg" variant="outline" className="bg-white/20">
-                Learn More
-              </Button>
+           <div className="relative flex h-screen flex-col items-center justify-center text-center px-4" data-bgcolor="#f5f5f5" data-textcolor="#111827">
+            <div className="relative z-10">
+              <h1 className="text-4xl font-bold tracking-tighter sm:text-6xl" style={{ zIndex: 2, lineHeight: 1.2 }}>
+                Your Unified Smart Health Assistant
+              </h1>
+              <p className="mx-auto max-w-[700px] text-gray-800 md:text-xl mt-4">
+                Smart health tracking, doctor finder, medicine reminders & record sharing — all in one place.
+              </p>
+              <div className="flex gap-4 mt-8 justify-center">
+                <Button size="lg" asChild className="neon-shadow-primary-hover">
+                  <a href="#home" data-scroll-to>Get Started</a>
+                </Button>
+                <Button size="lg" variant="outline" className="bg-white/20">
+                  Learn More
+                </Button>
+              </div>
             </div>
+            <div className="wave"></div>
+            <div className="wave"></div>
+            <div className="wave"></div>
           </div>
         </div>
         <div data-scroll-section data-bgcolor="#CCCCFF" data-textcolor="#111827">
@@ -46,5 +48,3 @@ export default function Home() {
     </>
   );
 }
-
-    
