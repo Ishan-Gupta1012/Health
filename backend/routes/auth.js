@@ -3,9 +3,12 @@ const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User');
+
 const router = express.Router();
 
-// Configure Google OAuth Strategy
+// --------------------
+// Google OAuth Setup
+// --------------------
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
@@ -15,28 +18,23 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     try {
       let user = await User.findOne({ googleId: profile.id });
       
-      if (user) {
-        return done(null, user);
-      }
-      
-      // Check if user exists with same email
+      if (user) return done(null, user);
+
       user = await User.findOne({ email: profile.emails[0].value });
       if (user) {
-        // Link Google account
         user.googleId = profile.id;
         user.avatar = profile.photos[0]?.value || '';
         await user.save();
         return done(null, user);
       }
-      
-      // Create new user
+
       user = new User({
         googleId: profile.id,
         email: profile.emails[0].value,
         name: profile.displayName,
         avatar: profile.photos[0]?.value || ''
       });
-      
+
       await user.save();
       done(null, user);
     } catch (error) {
@@ -45,10 +43,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   }));
 }
 
-passport.serializeUser((user, done) => {
-  done(null, user.userId);
-});
-
+passport.serializeUser((user, done) => done(null, user.userId));
 passport.deserializeUser(async (userId, done) => {
   try {
     const user = await User.findOne({ userId });
@@ -58,49 +53,37 @@ passport.deserializeUser(async (userId, done) => {
   }
 });
 
-// Generate JWT token
+// --------------------
+// JWT Helper
+// --------------------
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
+
+// --------------------
+// Auth Routes
+// --------------------
 
 // Register
 router.post('/register', async (req, res) => {
   try {
     const { email, password, name, phone, dateOfBirth, gender } = req.body;
-    
-    // Validation
+
     if (!email || !password || !name) {
       return res.status(400).json({ message: 'Email, password, and name are required' });
     }
-    
-    // Check if user exists
+
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists with this email' });
-    }
-    
-    // Create user
-    const user = new User({
-      email,
-      password,
-      name,
-      phone,
-      dateOfBirth,
-      gender
-    });
-    
+    if (existingUser) return res.status(400).json({ message: 'User already exists with this email' });
+
+    const user = new User({ email, password, name, phone, dateOfBirth, gender });
     await user.save();
-    
+
     const token = generateToken(user.userId);
-    
+
     res.status(201).json({
       message: 'User registered successfully',
-      user: {
-        userId: user.userId,
-        email: user.email,
-        name: user.name,
-        avatar: user.avatar
-      },
+      user: { userId: user.userId, email: user.email, name: user.name, avatar: user.avatar },
       token
     });
   } catch (error) {
@@ -113,33 +96,18 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
-    }
-    
-    // Find user
+    if (!email || !password) return res.status(400).json({ message: 'Email and password are required' });
+
     const user = await User.findOne({ email });
-    if (!user) {
+    if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
-    
-    // Check password
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-    
+
     const token = generateToken(user.userId);
-    
+
     res.json({
       message: 'Login successful',
-      user: {
-        userId: user.userId,
-        email: user.email,
-        name: user.name,
-        avatar: user.avatar
-      },
+      user: { userId: user.userId, email: user.email, name: user.name, avatar: user.avatar },
       token
     });
   } catch (error) {
@@ -148,10 +116,10 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Google OAuth routes
+// Google OAuth
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-router.get('/google/callback', 
+router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/signin' }),
   (req, res) => {
     const token = generateToken(req.user.userId);
@@ -159,14 +127,13 @@ router.get('/google/callback',
   }
 );
 
-// Verify token middleware
+// --------------------
+// Token Middleware
+// --------------------
 const verifyToken = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
-  
-  if (!token) {
-    return res.status(401).json({ message: 'Access token required' });
-  }
-  
+  if (!token) return res.status(401).json({ message: 'Access token required' });
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = decoded.userId;
@@ -176,41 +143,39 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-// Get user profile
+// Get Profile
 router.get('/profile', verifyToken, async (req, res) => {
   try {
     const user = await User.findOne({ userId: req.userId }).select('-password');
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    
+    if (!user) return res.status(404).json({ message: 'User not found' });
     res.json({ user });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch profile', error: error.message });
   }
 });
 
-// Update profile
+// Update Profile
 router.put('/profile', verifyToken, async (req, res) => {
   try {
     const updates = req.body;
-    delete updates.password; // Don't allow password update through this route
-    delete updates.email;    // Don't allow email update
-    
+    delete updates.password;
+    delete updates.email;
+
     const user = await User.findOneAndUpdate(
       { userId: req.userId },
       updates,
       { new: true, runValidators: true }
     ).select('-password');
-    
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
     res.json({ message: 'Profile updated successfully', user });
   } catch (error) {
     res.status(500).json({ message: 'Profile update failed', error: error.message });
   }
 });
 
-module.exports = { router, verifyToken };
+// --------------------
+// ✅ Export Only Router
+// --------------------
+module.exports = router; // <- FIXED
+module.exports.verifyToken = verifyToken; // optional, can import separately

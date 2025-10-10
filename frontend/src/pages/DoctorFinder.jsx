@@ -1,153 +1,121 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, MapPin, Star, Phone, Mail, Clock } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const DoctorFinder = () => {
   const [doctors, setDoctors] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searchFilters, setSearchFilters] = useState({
-    specialty: '',
-    city: '',
-    state: '',
-    rating: ''
-  });
+  const [loading, setLoading] = useState(true);
 
-  // Mock doctors data
   const mockDoctors = [
     {
-      doctorId: '1',
-      name: "Dr. Sarah Johnson",
-      specialty: "Cardiologist",
-      qualification: "MD, FACC",
-      experience: 12,
-      location: { address: "123 Medical Center Drive", city: "New York", state: "NY" },
-      contact: { phone: "+1-555-0123", email: "sarah.johnson@healthcenter.com" },
-      rating: 4.8,
-      reviewCount: 156,
-      consultationFee: 200,
-      availability: { days: ["Monday", "Tuesday", "Wednesday"], hours: { start: "09:00", end: "17:00" } }
+      name: "Dr. Emily Carter",
+      specialty: "Cardiology",
+      address: "123 Health St, Anytown, USA",
+      availability: "Available Today",
+      avatar: "https://i.pravatar.cc/150?img=1"
     },
     {
-      doctorId: '2',
-      name: "Dr. Michael Chen",
-      specialty: "Dermatologist",
-      qualification: "MD, Board Certified",
-      experience: 8,
-      location: { address: "456 Health Plaza", city: "Los Angeles", state: "CA" },
-      contact: { phone: "+1-555-0124", email: "michael.chen@skincare.com" },
-      rating: 4.6,
-      reviewCount: 89,
-      consultationFee: 180,
-      availability: { days: ["Monday", "Wednesday", "Friday"], hours: { start: "10:00", end: "18:00" } }
+      name: "Dr. Robert Harris",
+      specialty: "Pediatrics",
+      address: "456 Wellness Ave, Anytown, USA",
+      availability: "Available Tomorrow",
+      avatar: "https://i.pravatar.cc/150?img=2"
+    },
+    {
+      name: "Dr. Olivia Bennett",
+      specialty: "Dermatology",
+      address: "789 Skin Care Ln, Anytown, USA",
+      availability: "Available Today",
+      avatar: "https://i.pravatar.cc/150?img=3"
     }
   ];
 
   useEffect(() => {
-    setDoctors(mockDoctors);
-  }, []);
-
-  const searchDoctors = () => {
-    setLoading(true);
-    // Mock search with delay
     setTimeout(() => {
       setDoctors(mockDoctors);
       setLoading(false);
     }, 1000);
-  };
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen p-4 sm:p-6 md:p-8">
+      <div className="wave"></div>
+      <div className="wave"></div>
+      <div className="wave"></div>
+      <div className="max-w-7xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="glass-card p-6 mb-8"
         >
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">Find Doctors</h1>
-          <p className="text-xl text-gray-600">Discover qualified healthcare professionals near you</p>
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <div className="relative flex-grow w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-black/50" />
+              <input type="text" placeholder="Search by city or pincode" className="input pl-10" />
+            </div>
+            <div className="flex gap-4 w-full md:w-auto">
+                <div className="relative flex-grow">
+                    <select className="input appearance-none w-full">
+                        <option>Specialization</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-black/50" />
+                </div>
+                <div className="relative flex-grow">
+                     <select className="input appearance-none w-full">
+                        <option>Availability</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-black/50" />
+                </div>
+                 <div className="relative flex-grow">
+                     <select className="input appearance-none w-full">
+                        <option>Ratings</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-black/50" />
+                </div>
+            </div>
+          </div>
         </motion.div>
 
-        {/* Search Filters */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <input
-              type="text"
-              placeholder="Specialty"
-              value={searchFilters.specialty}
-              onChange={(e) => setSearchFilters({...searchFilters, specialty: e.target.value})}
-              className="input"
-              data-testid="specialty-search"
-            />
-            <input
-              type="text"
-              placeholder="City"
-              value={searchFilters.city}
-              onChange={(e) => setSearchFilters({...searchFilters, city: e.target.value})}
-              className="input"
-              data-testid="city-search"
-            />
-            <input
-              type="text"
-              placeholder="State"
-              value={searchFilters.state}
-              onChange={(e) => setSearchFilters({...searchFilters, state: e.target.value})}
-              className="input"
-              data-testid="state-search"
-            />
-            <button
-              onClick={searchDoctors}
-              className="btn-primary"
-              data-testid="search-doctors-btn"
-            >
-              <Search className="h-4 w-4 mr-2" />
-              Search
-            </button>
-          </div>
-        </div>
+        <h2 className="text-2xl font-bold text-black mb-6">Doctors near you</h2>
 
-        {/* Results */}
         {loading ? (
           <div className="flex justify-center py-12">
             <LoadingSpinner size="large" />
           </div>
         ) : (
-          <div className="grid gap-6" data-testid="doctors-list">
-            {doctors.map((doctor) => (
-              <motion.div
-                key={doctor.doctorId}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow"
-              >
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-2">{doctor.name}</h3>
-                    <p className="text-primary-600 font-medium mb-2">{doctor.specialty}</p>
-                    <p className="text-gray-600 mb-2">{doctor.qualification}</p>
-                    <div className="flex items-center mb-4">
-                      <MapPin className="h-4 w-4 text-gray-400 mr-1" />
-                      <span className="text-gray-600 text-sm">
-                        {doctor.location.city}, {doctor.location.state}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-4 text-sm text-gray-600">
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 text-yellow-400 mr-1" />
-                        <span>{doctor.rating} ({doctor.reviewCount} reviews)</span>
-                      </div>
-                      <div>{doctor.experience} years exp.</div>
-                      <div>${doctor.consultationFee} consultation</div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-1 space-y-4">
+              {doctors.map((doctor, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="glass-card p-4 flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-4">
+                    <img src={doctor.avatar} alt={doctor.name} className="w-16 h-16 rounded-full" />
+                    <div>
+                      <h3 className="font-bold text-black">{doctor.name}</h3>
+                      <p className="text-sm text-black/80">{doctor.specialty}</p>
+                      <p className="text-xs text-black/60">{doctor.address}</p>
+                      <p className="text-xs text-green-800 font-semibold mt-1">{doctor.availability}</p>
                     </div>
                   </div>
-                  <div className="mt-4 lg:mt-0 lg:ml-6">
-                    <button className="btn-primary w-full lg:w-auto" data-testid={`book-${doctor.doctorId}`}>
-                      Book Appointment
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                  <button className="btn-primary">Book Now</button>
+                </motion.div>
+              ))}
+            </div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="lg:col-span-2 rounded-xl overflow-hidden glass-card"
+            >
+              <img src="https://i.imgur.com/8V2aV3m.png" alt="Map of doctors near you" className="w-full h-full object-cover"/>
+            </motion.div>
           </div>
         )}
       </div>

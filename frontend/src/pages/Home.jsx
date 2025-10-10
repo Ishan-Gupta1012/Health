@@ -7,7 +7,8 @@ import {
   Search, 
   Calendar, 
   FileText,
-  ArrowRight
+  ArrowRight,
+  ClipboardList // Corrected Icon
 } from 'lucide-react';
 import useAuthHook from '../hooks/useAuth';
 
@@ -26,7 +27,7 @@ const FeatureCard = ({ icon: Icon, title, description, linkTo }) => {
       <Link
         to={linkTo}
         className="inline-flex items-center text-blue-600 hover:text-black font-medium transition-colors mt-auto"
-        data-testid={`feature-link-${title.toLowerCase().replace(' ', '-')}`}
+        data-testid={`feature-link-${title.toLowerCase().replace(/ /g, '-')}`}
       >
         Explore <ArrowRight className="ml-1 h-4 w-4" />
       </Link>
@@ -67,10 +68,16 @@ const Home = () => {
     },
     {
       icon: FileText,
-      title: "Medical Record Sharing",
-      description: "Securely share your medical records with healthcare providers.",
+      title: "Upload Reports",
+      description: "Securely upload and manage your medical records and reports.",
       linkTo: user ? "/medical-records" : "/signin"
-    }
+    },
+    {
+        icon: ClipboardList, // Corrected Icon
+        title: "Prescription Assistant",
+        description: "Upload prescriptions to find the best deals on your medicines online.",
+        linkTo: user ? "/prescription-assistant" : "/signin"
+      }
   ];
 
   return (
@@ -132,7 +139,7 @@ const Home = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <motion.div
                 key={feature.title}
@@ -152,3 +159,4 @@ const Home = () => {
 };
 
 export default Home;
+

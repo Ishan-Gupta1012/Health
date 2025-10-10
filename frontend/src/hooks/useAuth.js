@@ -1,138 +1,175 @@
 import { useState, useEffect, createContext, useContext } from 'react';
+import { initializeApp } from 'firebase/app';
+import {
+  getAuth,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup
+} from 'firebase/auth';
 import { apiService } from '../utils/api';
 
+// 🔐 Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyB4qe-u7q2XKKX-FXF5d7kVFCjBKKiKBhk",
+  authDomain: "studio-7740314856-cbdca.firebaseapp.com",
+  projectId: "studio-7740314856-cbdca",
+  storageBucket: "studio-7740314856-cbdca.appspot.com",
+  messagingSenderId: "436148299955",
+  appId: "1:436148299955:web:f994a090ae6de34ea8c6"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// -----------------
+// Context Setup
+// -----------------
 const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
 };
 
+// -----------------
+// AuthProvider
+// -----------------
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Check Firebase auth state
   useEffect(() => {
-    const initAuth = async () => {
-      const token = localStorage.getItem('healthnest_token');
-      const savedUser = localStorage.getItem('healthnest_user');
-
-      if (token && savedUser) {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
         try {
-          // Verify token is still valid
-          const response = await apiService.auth.getProfile();
-          setUser(response.data.user);
+          const token = localStorage.getItem('healthnest_token');
+          if (token) {
+            const cachedUser = JSON.parse(localStorage.getItem('healthnest_user'));
+            setUser(cachedUser);
+
+            const response = await apiService.auth.getProfile();
+            setUser(response.data.user);
+          }
         } catch (error) {
-          console.error('Token validation failed:', error);
+          console.error("Profile fetch error:", error.message);
+          await signOut(auth);
           localStorage.removeItem('healthnest_token');
           localStorage.removeItem('healthnest_user');
+          setUser(null);
         }
+      } else {
+        setUser(null);
       }
       setLoading(false);
-    };
+    });
 
-    initAuth();
+    return () => unsubscribe();
   }, []);
 
-  const login = async (credentials) => {
+  // -----------------
+  // Auth Functions
+  // -----------------
+  const login = async (email, password) => {
     try {
-      const response = await apiService.auth.login(credentials);
-      const { user, token } = response.data;
-      
+      await signInWithEmailAndPassword(auth, email, password);
+      const response = await apiService.auth.login({ email, password });
+      const { token, user: backendUser } = response.data;
+
       localStorage.setItem('healthnest_token', token);
-      localStorage.setItem('healthnest_user', JSON.stringify(user));
-      setUser(user);
-      
-      return { success: true, user };
+      localStorage.setItem('healthnest_user', JSON.stringify(backendUser));
+      setUser(backendUser);
+
+      return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Login failed' 
-      };
+      const message = error?.message || 'Login failed';
+      console.error("Login Error:", message);
+      return { success: false, error: message };
     }
   };
 
-  const register = async (userData) => {
+  const register = async (name, email, password) => {
     try {
-      const response = await apiService.auth.register(userData);
-      const { user, token } = response.data;
-      
+      const response = await apiService.auth.register({ name, email, password });
+      const { token, user: backendUser } = response.data;
+
+      await createUserWithEmailAndPassword(auth, email, password);
+
       localStorage.setItem('healthnest_token', token);
-      localStorage.setItem('healthnest_user', JSON.stringify(user));
-      setUser(user);
-      
-      return { success: true, user };
+      localStorage.setItem('healthnest_user', JSON.stringify(backendUser));
+      setUser(backendUser);
+
+      return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Registration failed' 
-      };
+      const message = error?.message || 'Registration failed';
+      console.error("Registration Error:", message);
+      return { success: false, error: message };
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('healthnest_token');
-    localStorage.removeItem('healthnest_user');
-    setUser(null);
+  const loginWithGoogle = () => {
+    const provider = new GoogleAuthProvider();
+    return signInWithPopup(auth, provider)
+      .then(async (result) => {
+        const firebaseUser = result.user;
+
+        // Google OAuth backend call (no more googleSync)
+        const tokenResponse = await apiService.auth.login({
+          email: firebaseUser.email,
+          password: firebaseUser.uid, // Use UID as temporary password if backend allows
+        }).catch(() => {
+          // Optional: If user doesn't exist in backend, auto-register
+          return apiService.auth.register({
+            name: firebaseUser.displayName,
+            email: firebaseUser.email,
+            password: firebaseUser.uid
+          });
+        });
+
+        const { token, user: backendUser } = tokenResponse.data;
+        localStorage.setItem('healthnest_token', token);
+        localStorage.setItem('healthnest_user', JSON.stringify(backendUser));
+        setUser(backendUser);
+
+        return { success: true };
+      })
+      .catch((error) => {
+        const message = error?.message || 'Google login failed';
+        console.error("Google Login Error:", message);
+        return { success: false, error: message };
+      });
   };
 
-  const updateUser = async (userData) => {
+  const logout = async () => {
     try {
-      const response = await apiService.auth.updateProfile(userData);
-      const updatedUser = response.data.user;
-      
-      localStorage.setItem('healthnest_user', JSON.stringify(updatedUser));
-      setUser(updatedUser);
-      
-      return { success: true, user: updatedUser };
+      await signOut(auth);
+      localStorage.removeItem('healthnest_token');
+      localStorage.removeItem('healthnest_user');
+      setUser(null);
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Profile update failed' 
-      };
+      console.error("Logout Error:", error?.message);
     }
   };
 
+  // -----------------
+  // Context Value
+  // -----------------
   const value = {
     user,
     loading,
     login,
     register,
+    loginWithGoogle,
     logout,
-    updateUser,
     isAuthenticated: !!user,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Hook for components outside of context
-export default function useAuthHook() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const initAuth = async () => {
-      const token = localStorage.getItem('healthnest_token');
-      const savedUser = localStorage.getItem('healthnest_user');
-
-      if (token && savedUser) {
-        try {
-          const response = await apiService.auth.getProfile();
-          setUser(response.data.user);
-        } catch (error) {
-          localStorage.removeItem('healthnest_token');
-          localStorage.removeItem('healthnest_user');
-        }
-      }
-      setLoading(false);
-    };
-
-    initAuth();
-  }, []);
-
-  return { user, loading };
-}
+export default useAuth;
