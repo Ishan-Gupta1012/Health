@@ -1,121 +1,49 @@
-// --------------------
-// 🔹 Imports
-// --------------------
+// backend/server.js
+
+// 1. LOAD ENVIRONMENT VARIABLES FIRST
+require('dotenv').config(); 
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+const cookieParser = require('cookie-parser');
 
-// --------------------
-// 🔹 App Initialization
-// --------------------
-const app = express();
-const PORT = process.env.PORT || 8001;
-
-// --------------------
-// 🔹 Security Middleware
-// --------------------
-app.use(helmet());
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true,
-}));
-
-// --------------------
-// 🔹 Rate Limiting
-// --------------------
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200, // limit each IP to 200 requests per 15 minutes
-});
-app.use('/api', limiter);
-
-// --------------------
-// 🔹 Body Parsers
-// --------------------
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// --------------------
-// 🔹 MongoDB Connection
-// --------------------
-const connectDB = async () => {
-  try {
-    if (process.env.MONGODB_URI) {
-      await mongoose.connect(process.env.MONGODB_URI);
-      console.log('✅ MongoDB connected successfully');
-    } else {
-      console.warn('⚠️  MongoDB URI not found in .env file');
-      console.warn('📝 Add MONGODB_URI to backend/.env');
-    }
-  } catch (error) {
-    console.error('❌ MongoDB connection error:', error.message);
-    process.exit(1);
-  }
-};
-
-connectDB();
-
-// --------------------
-// 🔹 Health Check Route
-// --------------------
-app.get('/api/health', (req, res) => {
-  res.json({
-    message: 'HealthNest Backend API is running!',
-    timestamp: new Date().toISOString(),
-    mongodb: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
-  });
-});
-
-// --------------------
-// 🔹 Route Imports
-// --------------------
+// Route Imports
 const authRoutes = require('./routes/auth');
 const doctorRoutes = require('./routes/doctors');
-const symptomRoutes = require('./routes/symptoms');
-const reminderRoutes = require('./routes/reminders');
 const recordRoutes = require('./routes/records');
+const reminderRoutes = require('./routes/reminders');
+const symptomRoutes = require('./routes/symptoms');
 
-// --------------------
-// 🔹 Route Mounting
-// --------------------
+const app = express();
+
+// Middleware
+app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true,
+}));
+app.use(express.json());
+app.use(cookieParser());
+
+// Database Connection
+mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('MongoDB connected successfully.'))
+    .catch(err => console.error('MongoDB connection error:', err));
+
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/doctors', doctorRoutes);
-app.use('/api/symptoms', symptomRoutes);
-app.use('/api/reminders', reminderRoutes);
 app.use('/api/records', recordRoutes);
+app.use('/api/reminders', reminderRoutes);
+app.use('/api/symptoms', symptomRoutes);
 
-// --------------------
-// 🔹 Static File Hosting
-// --------------------
-app.use('/api/uploads', express.static('uploads'));
-
-// --------------------
-// 🔹 Error Handling Middleware
-// --------------------
+// Global Error Handler
 app.use((err, req, res, next) => {
-  console.error('❌ Error:', err.stack);
-  res.status(500).json({
-    message: 'Something went wrong!',
-    error: process.env.NODE_ENV === 'production' ? {} : err.message,
-  });
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
 });
 
-// --------------------
-// 🔹 404 Handler
-// --------------------
-app.use('*', (req, res) => {
-  res.status(404).json({ message: 'API endpoint not found' });
+const PORT = process.env.PORT || 8001;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
-
-// --------------------
-// 🔹 Server Start
-// --------------------
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 HealthNest Backend Server running on port ${PORT}`);
-  console.log(`📱 Health check: http://localhost:${PORT}/api/health`);
-});
-
-module.exports = app;

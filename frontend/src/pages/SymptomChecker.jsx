@@ -1,22 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, ChevronDown, Stethoscope } from 'lucide-react';
+import { Stethoscope, LogIn } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import { api } from '../utils/api';
+import { getAuthHeaders, getErrorMessage } from '../utils/api'; // Import helpers
 
 const SymptomChecker = () => {
-    const [symptoms, setSymptoms] = useState([]);
-    
-    const suggestedSymptoms = [
-        { name: 'Headache', icon: '🤕' },
-        { name: 'Fever', icon: '🤒' },
-        { name: 'Cough', icon: '😷' },
-        { name: 'Sore Throat', icon: '😩' },
-        { name: 'Nausea', icon: '🤢' },
-        { name: 'Fatigue', icon: '😴' },
-    ];
+    const { user } = useAuth();
+    const [availableSymptoms, setAvailableSymptoms] = useState([]);
+    const [selectedSymptom, setSelectedSymptom] = useState('');
+    const [results, setResults] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (user) {
+            const fetchSymptoms = async () => {
+                try {
+                    const response = await api.get('/symptoms/available', {
+                        headers: getAuthHeaders()
+                    });
+                    setAvailableSymptoms(response.data.symptoms);
+                } catch (err) {
+                    setError(getErrorMessage(err));
+                    console.error('Fetch symptoms error:', err);
+                }
+            };
+            fetchSymptoms();
+        }
+    }, [user]);
+
+    const handleCheckSymptoms = async () => {
+        if (!selectedSymptom) {
+            setError('Please select a symptom or condition.');
+            return;
+        }
+        setIsLoading(true);
+        setError('');
+        setResults(null);
+        try {
+            const response = await api.post('/symptoms/check', 
+                { symptoms: [selectedSymptom] },
+                { headers: getAuthHeaders() }
+            );
+            setResults(response.data);
+        } catch (err) {
+            setError(getErrorMessage(err));
+            console.error('Check symptoms error:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    if (!user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center p-4">
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="glass-card p-8 text-center"
+                >
+                    <LogIn className="mx-auto h-12 w-12 text-black" />
+                    <h1 className="text-2xl font-bold text-black mt-4">Login Required</h1>
+                    <p className="text-black/80 my-4">You must be logged in to use the Symptom Checker.</p>
+                    <Link to="/signin" className="btn-primary">
+                        Go to Sign In
+                    </Link>
+                </motion.div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen p-4 sm:p-6 md:p-8">
-             <div className="wave"></div>
+            <div className="wave"></div>
             <div className="wave"></div>
             <div className="wave"></div>
             <div className="max-w-4xl mx-auto">
@@ -29,46 +87,45 @@ const SymptomChecker = () => {
                     <div className="text-center mb-8">
                         <Stethoscope className="mx-auto h-12 w-12 text-black" />
                         <h1 className="text-3xl font-bold text-black mt-4">Symptom Checker</h1>
-                        <p className="text-black/80">Describe your symptoms to get insights.</p>
+                        <p className="text-black/80">Select a primary symptom or condition to get started.</p>
                     </div>
 
                     <div className="space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-black mb-2">Enter your symptoms</label>
-                            <div className="relative">
-                                <select className="input appearance-none">
-                                    <option>Select or type your symptoms</option>
+                            <label className="block text-sm font-medium text-black mb-2">Search for a Symptom or Condition</label>
+                            <div className="flex gap-2">
+                                <select 
+                                    className="input appearance-none w-full"
+                                    value={selectedSymptom}
+                                    onChange={(e) => setSelectedSymptom(e.target.value)}
+                                >
+                                    <option value="">-- Select from {availableSymptoms.length} options --</option>
+                                    {availableSymptoms.map((symptom) => (
+                                        <option key={symptom.value} value={symptom.value}>
+                                            {symptom.name}
+                                        </option>
+                                    ))}
                                 </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-black/50" />
+                                <button onClick={handleCheckSymptoms} className="btn-primary whitespace-nowrap" disabled={isLoading}>
+                                    {isLoading ? 'Checking...' : 'Check'}
+                                </button>
                             </div>
                         </div>
 
-                        <div>
-                            <h3 className="text-sm font-medium text-black mb-3">Visual Symptom Suggestions</h3>
-                            <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
-                                {suggestedSymptoms.map(symptom => (
-                                    <div key={symptom.name} className="flex flex-col items-center p-3 bg-white/20 rounded-lg cursor-pointer hover:bg-white/30 transition">
-                                        <div className="text-4xl">{symptom.icon}</div>
-                                        <p className="text-xs mt-2 text-black">{symptom.name}</p>
+                        {error && <p className="text-red-500 text-center">{error}</p>}
+
+                        {results && (
+                            <div className="bg-blue-100/50 p-4 rounded-lg text-black animate-fade-in">
+                                <h4 className="font-semibold text-lg mb-2">Results</h4>
+                                {results.results.map((result, index) => (
+                                    <div key={index} className="mb-3">
+                                        <p className="font-bold">{result.symptom}</p>
+                                        <p className="text-sm"><span className="font-semibold">Recommendation:</span> {result.recommendations.join(', ')}</p>
                                     </div>
                                 ))}
+                                <p className="text-xs mt-4 italic">{results.disclaimer}</p>
                             </div>
-                        </div>
-
-                        <div className="bg-blue-100/50 p-4 rounded-lg text-black">
-                            <h4 className="font-semibold">Likely Condition Category</h4>
-                            <p className="text-sm">Based on your symptoms, the likely condition category is: <span className="font-bold text-blue-800">Respiratory Illness</span></p>
-                            <h4 className="font-semibold mt-2">Recommended Action</h4>
-                            <p className="text-sm">Self-care measures are recommended. If symptoms persist, consider a <a href="#" className="text-blue-600 underline">GP visit</a>.</p>
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-black mb-2">Find a Nearby Doctor (Optional)</label>
-                             <div className="flex gap-2">
-                                <input type="text" placeholder="Enter your location" className="input" />
-                                <button className="btn-primary whitespace-nowrap">Find Doctors</button>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </motion.div>
             </div>
