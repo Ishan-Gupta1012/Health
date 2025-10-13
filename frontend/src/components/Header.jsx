@@ -46,6 +46,7 @@ const Header = () => {
     { name: 'Medicine Reminders', path: '/medicine-reminders', icon: Calendar, requiresAuth: true },
     { name: 'Medical Records', path: '/medical-records', icon: FileText, requiresAuth: true },
     { name: 'Prescription Assistant', path: '/prescription-assistant', icon: ClipboardList, requiresAuth: true },
+    { name: 'My Meals', path: '/my-meals', icon: ClipboardList, requiresAuth: true },
   ];
 
   const isActive = (path) => location.pathname === path;

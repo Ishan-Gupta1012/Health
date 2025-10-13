@@ -108,6 +108,58 @@ export const records = {
     } catch (err) { // <-- THE MISSING BRACE IS NOW ADDED HERE
       throw new Error(getErrorMessage(err));
     }
+  },
+
+  meals: {
+    addMeal: async (mealData) => {
+        const res = await fetch(`${BASE_URL}/meals`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders(),
+            },
+            body: JSON.stringify(mealData),
+        });
+        return handleResponse(res);
+    },
+    getTodaysMeals: async () => {
+        const res = await fetch(`${BASE_URL}/meals/today`, {
+            headers: getAuthHeaders(),
+        });
+        const data = await handleResponse(res);
+        return data.meals;
+    },
+    getMealHistory: async () => {
+        const res = await fetch(`${BASE_URL}/meals/history`, {
+            headers: getAuthHeaders(),
+        });
+        const data = await handleResponse(res);
+        return data.meals;
+    },
+    updateMeal: async (id, mealData) => {
+        const res = await fetch(`${BASE_URL}/meals/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders(),
+            },
+            body: JSON.stringify(mealData),
+        });
+        return handleResponse(res);
+    },
+    deleteMeal: async (id) => {
+        const res = await fetch(`${BASE_URL}/meals/${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders(),
+        });
+        return handleResponse(res);
+    },
+    getAIAdvice: async () => {
+        const res = await fetch(`${BASE_URL}/meals/advice`, {
+            headers: getAuthHeaders(),
+        });
+        return handleResponse(res);
+    }
   }
 };
 

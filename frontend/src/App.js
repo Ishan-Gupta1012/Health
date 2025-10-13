@@ -16,6 +16,7 @@ import MedicineReminders from './pages/MedicineReminders';
 import MedicalRecords from './pages/MedicalRecords';
 import Profile from './pages/Profile';
 import PrescriptionAssistant from './pages/PrescriptionAssistant'; // New Import
+import MealTracker from './pages/MyMeals/MealTracker';
 
 // Hooks
 import { useAuth } from './hooks/useAuth';
@@ -46,6 +47,7 @@ function App() {
               <Route path="/medical-records" element={user ? <MedicalRecords /> : <Navigate to="/signin" />} />
               <Route path="/prescription-assistant" element={user ? <PrescriptionAssistant /> : <Navigate to="/signin" />} />
               <Route path="/profile" element={user ? <Profile /> : <Navigate to="/signin" />} />
+              <Route path="/meal-tracker" element={<MealTracker />} />
             </Routes>
           </AnimatePresence>
         </main>
