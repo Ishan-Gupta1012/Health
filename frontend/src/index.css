@@ -2,84 +2,107 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  body {
-    @apply text-black;
-    margin: auto;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    overflow: auto;
-    background: linear-gradient(315deg, #48bfe3 3%, #678D99 38%, #ffb6c1 68%, #e6e6ff 98%);
-    animation: gradient 15s ease infinite;
-    background-size: 400% 400%;
-    background-attachment: fixed;
-  }
+body {
+  @apply font-sans;
+  /* This existing background and its animation are PRESERVED */
+  background: linear-gradient(135deg, #fce3ec 0%, #fde4d8 25%, #d6eaff 50%, #e1d8ff 75%, #fde4d8 100%);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
 }
 
-@layer components {
-  .btn-primary {
-    @apply bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105;
-  }
-  
-  .btn-secondary {
-    @apply bg-white/20 hover:bg-white/30 text-black border border-black/50 font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105;
-  }
-  
-  .glass-card {
-    background: hsla(0, 0%, 100%, 0.15);
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid hsla(0, 0%, 100%, 0.2);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    @apply rounded-xl;
-  }
-
-  .input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 bg-white/80 text-gray-900;
-  }
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-@keyframes gradient {
-    0% { background-position: 0% 0%; }
-    50% { background-position: 100% 100%; }
-    100% { background-position: 0% 0%; }
-}
-
+/* The existing wave colors and animations are PRESERVED */
 .wave {
-    background: rgb(255 255 255 / 40%);
-    border-radius: 1000% 1000% 0 0;
-    position: fixed;
-    width: 200%;
-    height: 12em;
-    animation: wave 10s -3s linear infinite;
-    transform: translate3d(0, 0, 0);
-    opacity: 0.8;
-    bottom: 0;
-    left: 0;
-    z-index: -1;
+  background: #9DEAE7;
+  border-radius: 1000% 1000% 0 0;
+  position: fixed;
+  width: 200%;
+  height: 12em;
+  animation: wave 10s -3s linear infinite;
+  transform: translate3d(0, 0, 0);
+  opacity: 0.8;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
 }
-
 .wave:nth-of-type(2) {
-    bottom: -1.25em;
-    animation: wave 18s linear reverse infinite;
-    opacity: 0.8;
+  background: #B1E7F1;
+  bottom: -1.25em;
+  animation: wave 18s linear reverse infinite;
+  opacity: 0.7;
 }
-
 .wave:nth-of-type(3) {
-    bottom: -2.5em;
-    animation: wave 20s -1s reverse infinite;
-    opacity: 0.9;
+  background: #BDDFFB;
+  bottom: -2.5em;
+  animation: wave 20s -1s reverse infinite;
+  opacity: 0.6;
 }
-
 @keyframes wave {
-    2% { transform: translateX(1); }
-    25% { transform: translateX(-25%); }
-    50% { transform: translateX(-50%); }
-    75% { transform: translateX(-25%); }
-    100% { transform: translateX(1); }
+  2% { transform: translateX(1); }
+  25% { transform: translateX(-25%); }
+  50% { transform: translateX(-50%); }
+  75% { transform: translateX(-25%); }
+  100% { transform: translateX(1); }
 }
 
-.gradient-text {
-  background: linear-gradient(45deg, #000000, #333333);
+/* Glassmorphism Card Style is PRESERVED */
+.glass-card {
+  @apply bg-white/20 backdrop-blur-lg rounded-2xl shadow-lg border border-white/30;
+}
+
+/* Input Style is PRESERVED */
+.input {
+  @apply w-full px-4 py-2 bg-white/30 text-black placeholder-black/60 border border-white/50 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all;
+}
+
+/* --- STYLES UPDATED WITH DARKER COLORS --- */
+
+/* 1. Iridescent Text with a darker, more vibrant gradient */
+.iridescent-text {
+  background: linear-gradient(90deg, #38A3A5, #8E78FF, #56ABF1);
   -webkit-background-clip: text;
-  background-clip: text;
   -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  animation: shimmer 6s infinite ease-in-out;
+}
+
+@keyframes shimmer {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.2) drop-shadow(0 0 5px rgba(142, 120, 255, 0.4)); }
+  100% { filter: brightness(1); }
+}
+
+/* 2. Primary Frosted Glass Button with darker text */
+.btn-primary {
+  @apply text-[#003B54] font-semibold rounded-full shadow-lg transition-all duration-300;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.8rem 1.6rem;
+  box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.25);
+}
+.btn-primary:hover {
+  color: white;
+  background: linear-gradient(135deg, #00C9A7, #0078FF); /* Vibrant hover */
+  box-shadow: 0 0 20px rgba(0, 201, 167, 0.5);
+  transform: translateY(-2px);
+}
+
+/* 3. Secondary Frosted Glass Button with darker text */
+.btn-secondary {
+  @apply bg-transparent font-medium rounded-full transition-all duration-300;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #004D61;
+  padding: 0.7rem 1.3rem;
+}
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #002D38;
+  box-shadow: 0 0 10px rgba(177, 231, 241, 0.4);
 }

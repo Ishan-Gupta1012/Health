@@ -1,49 +1,44 @@
-// backend/server.js
-
-// 1. LOAD ENVIRONMENT VARIABLES FIRST
-require('dotenv').config(); 
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+require('dotenv').config();
 
-// Route Imports
+// Import Existing and New Routes
 const authRoutes = require('./routes/auth');
-const doctorRoutes = require('./routes/doctors');
-const recordRoutes = require('./routes/records');
 const reminderRoutes = require('./routes/reminders');
+const recordsRoutes = require('./routes/records');
 const symptomRoutes = require('./routes/symptoms');
+const doctorRoutes = require('./routes/doctors'); // <-- 1. IMPORT THE NEW ROUTE
 
 const app = express();
+const PORT = process.env.PORT || 8001;
 
-// Middleware
+// Middleware Setup
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    credentials: true,
+    credentials: true
 }));
-app.use(express.json());
-app.use(cookieParser());
-
-// Database Connection
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('MongoDB connected successfully.'))
-    .catch(err => console.error('MongoDB connection error:', err));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use('/uploads', express.static('uploads'));
 
 // API Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/doctors', doctorRoutes);
-app.use('/api/records', recordRoutes);
 app.use('/api/reminders', reminderRoutes);
+app.use('/api/records', recordsRoutes);
 app.use('/api/symptoms', symptomRoutes);
+app.use('/api/doctors', doctorRoutes); // <-- 2. ADD THE ROUTE TO THE APP
 
-// Global Error Handler
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
-});
+// Database Connection
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('MongoDB connected successfully.'))
+.catch(err => console.error('MongoDB connection error:', err));
 
-const PORT = process.env.PORT || 8001;
+// Start Server
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });

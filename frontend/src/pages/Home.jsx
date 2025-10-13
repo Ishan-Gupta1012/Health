@@ -1,155 +1,109 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  Heart, 
-  Stethoscope, 
-  Search, 
-  Calendar, 
-  FileText,
-  ArrowRight,
-  ClipboardList // Corrected Icon
-} from 'lucide-react';
-import useAuthHook from '../hooks/useAuth';
+import { BrainCircuit, Search, BarChart3, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-const FeatureCard = ({ icon: Icon, title, description, linkTo }) => {
+const FeatureCard = ({ icon, title, description, delay }) => {
   return (
     <motion.div
-      whileHover={{ y: -5, scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      className="glass-card h-full flex flex-col p-6"
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.5 }}
+      transition={{ duration: 0.7, delay }}
+      className="glass-card p-8 text-center flex flex-col items-center"
     >
-      <div className="w-12 h-12 bg-black/20 rounded-lg flex items-center justify-center mb-4">
-        <Icon className="h-6 w-6 text-black" />
+      <div className="bg-white/30 p-4 rounded-full mb-6">
+        {icon}
       </div>
-      <h3 className="text-xl font-semibold text-black mb-3">{title}</h3>
-      <p className="text-black/80 mb-4 leading-relaxed flex-grow">{description}</p>
-      <Link
-        to={linkTo}
-        className="inline-flex items-center text-blue-600 hover:text-black font-medium transition-colors mt-auto"
-        data-testid={`feature-link-${title.toLowerCase().replace(/ /g, '-')}`}
-      >
-        Explore <ArrowRight className="ml-1 h-4 w-4" />
+      <h3 className="text-2xl font-bold text-black mb-3">{title}</h3>
+      <p className="text-black/70 flex-grow">{description}</p>
+      {/* Updated link color to match the new darker theme */}
+      <Link to="/" className="mt-6 font-semibold text-[#004D61] hover:text-[#002D38] transition-colors flex items-center">
+        Learn More <ChevronRight size={20} className="ml-1" />
       </Link>
     </motion.div>
   );
 };
 
 const Home = () => {
-  const { user } = useAuthHook();
-  const navigate = useNavigate();
-
-  const handleGetStarted = () => {
-    if (user) {
-      navigate('/symptom-checker');
-    } else {
-      navigate('/signin');
-    }
-  };
-
   const features = [
     {
-      icon: Stethoscope,
-      title: "Symptom Checker",
-      description: "Enter your symptoms and get AI-powered insights on possible causes.",
-      linkTo: "/symptom-checker"
+      icon: <BrainCircuit size={32} className="text-[#8E78FF]" />,
+      title: "AI Symptom Assistant",
+      description: "Get intelligent insights into your symptoms with our advanced AI-powered checker.",
+      delay: 0.1,
     },
     {
-      icon: Search,
+      icon: <Search size={32} className="text-[#38A3A5]" />,
       title: "Doctor Finder",
-      description: "Find verified doctors and specialists near you. Filter by specialty and distance.",
-      linkTo: "/doctor-finder"
+      description: "Easily find and connect with top-rated doctors and specialists in your area.",
+      delay: 0.3,
     },
     {
-      icon: Calendar,
-      title: "Medicine Reminders",
-      description: "Set reminders for your medications and never miss a dose.",
-      linkTo: user ? "/medicine-reminders" : "/signin"
+      icon: <BarChart3 size={32} className="text-[#56ABF1]" />,
+      title: "Health Insights",
+      description: "Track your medical records and gain personal health insights to manage your well-being.",
+      delay: 0.5,
     },
-    {
-      icon: FileText,
-      title: "Upload Reports",
-      description: "Securely upload and manage your medical records and reports.",
-      linkTo: user ? "/medical-records" : "/signin"
-    },
-    {
-        icon: ClipboardList, // Corrected Icon
-        title: "Prescription Assistant",
-        description: "Upload prescriptions to find the best deals on your medicines online.",
-        linkTo: user ? "/prescription-assistant" : "/signin"
-      }
   ];
 
   return (
-    <div className="min-h-screen text-black">
+    <div className="overflow-hidden">
+      {/* These existing waves are PRESERVED */}
       <div className="wave"></div>
       <div className="wave"></div>
       <div className="wave"></div>
-      
+
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
-        <div className="relative z-10 max-w-7xl mx-auto text-center">
+      <section className="relative min-h-screen flex items-center justify-center text-center px-4">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          className="z-10"
+        >
+          {/* This heading will now use the new darker iridescent-text class */}
+          <h1 className="text-5xl md:text-7xl font-bold text-gray-800 leading-tight">
+            <span className="iridescent-text">Smart.</span>{' '}
+            <span className="iridescent-text">Personal.</span>{' '}
+            <span className="iridescent-text">Natural.</span>
+            <br />
+            Your All-in-One Health Companion.
+          </h1>
+          <p className="mt-6 text-lg md:text-xl max-w-3xl mx-auto text-black/60">
+            Bringing simplicity, care, and AI-powered health to your fingertips.
+          </p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 1, delay: 0.5 }}
+            className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold leading-tight mb-6">
-              Your Unified Smart Health Assistant
-            </h1>
-            <p className="text-xl lg:text-2xl text-black/80 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Smart health tracking, doctor finder, medicine reminders & record sharing — all in one place.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleGetStarted}
-                className="btn-primary text-lg px-8 py-3"
-                data-testid="get-started-btn"
-              >
-                Get Started
-              </motion.button>
-              <Link
-                to="/doctor-finder"
-                className="btn-secondary text-lg px-8 py-3"
-                data-testid="learn-more-btn"
-              >
-                Learn More
-              </Link>
-            </div>
+            {/* These buttons will now use the new darker frosted glass styles */}
+            <Link to="/symptom-checker" className="btn-primary">Get Started</Link>
+            <Link to="/about" className="btn-secondary">Learn More</Link>
           </motion.div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20" data-testid="features-section">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 px-4 relative z-10">
+        <div className="max-w-6xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true, amount: 0.3 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.7 }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold mb-4">A Suite of Smart Health Tools</h2>
-            <p className="text-xl text-black/80 max-w-3xl mx-auto">
-              From checking your symptoms to managing your health records, HealthNest has you covered.
+            <h2 className="text-4xl font-bold text-black">A Smarter Way to Manage Your Health</h2>
+            <p className="mt-4 text-lg text-black/60 max-w-2xl mx-auto">
+              HealthNest integrates modern technology with personal care to provide a seamless health experience.
             </p>
           </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true, amount: 0.5 }}
-              >
-                <FeatureCard {...feature} />
-              </motion.div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {features.map((feature) => (
+              <FeatureCard key={feature.title} {...feature} />
             ))}
           </div>
         </div>
@@ -159,4 +113,3 @@ const Home = () => {
 };
 
 export default Home;
-

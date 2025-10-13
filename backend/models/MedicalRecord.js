@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { nanoid } = require('nanoid');
 
 const medicalRecordSchema = new mongoose.Schema({
   recordId: {
@@ -12,57 +13,32 @@ const medicalRecordSchema = new mongoose.Schema({
     required: true,
     ref: 'User'
   },
-  type: {
-    type: String,
-    required: true,
-    enum: ['prescription', 'lab_report', 'xray', 'scan', 'document', 'other']
-  },
-  title: {
+  recordType: {
     type: String,
     required: true
   },
-  description: {
-    type: String,
-    default: ''
-  },
-  files: [{
-    filename: String,
-    originalName: String,
-    mimetype: String,
-    size: Number,
-    path: String,
-    uploadDate: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  doctorName: {
-    type: String,
-    default: ''
-  },
-  hospitalName: {
-    type: String,
-    default: ''
-  },
   date: {
     type: Date,
-    required: true,
-    default: Date.now
+    required: true
   },
-  tags: [String],
-  isShared: {
-    type: Boolean,
-    default: false
+  details: {
+    type: String,
+    default: ''
   },
-  sharedWith: [{
-    email: String,
-    sharedDate: Date,
-    accessType: {
-      type: String,
-      enum: ['view', 'edit'],
-      default: 'view'
-    }
-  }]
+  doctor: {
+    type: String,
+    default: ''
+  },
+  // ADDED: To store the path of the uploaded file
+  fileUrl: {
+    type: String
+  },
+  // ADDED: To create a unique link for sharing
+  shareableLink: {
+    type: String,
+    unique: true,
+    default: () => nanoid(12) // Generates a unique 12-character ID
+  }
 }, {
   timestamps: true
 });

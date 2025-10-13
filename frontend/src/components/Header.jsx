@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Menu, 
-  X, 
-  Heart, 
-  User, 
+import {
+  Menu,
+  X,
+  Heart,
+  User,
   LogOut,
   Stethoscope,
   Search,
@@ -22,6 +22,18 @@ const Header = () => {
   const [isServicesOpen, setIsServicesOpen] = useState(false);
   const { user, logout } = useAuth();
   const location = useLocation();
+  const servicesTimeoutRef = useRef(null);
+
+  const handleServicesMouseEnter = () => {
+    clearTimeout(servicesTimeoutRef.current);
+    setIsServicesOpen(true);
+  };
+
+  const handleServicesMouseLeave = () => {
+    servicesTimeoutRef.current = setTimeout(() => {
+      setIsServicesOpen(false);
+    }, 200);
+  };
 
   const navigationItems = [
     { name: 'Home', path: '/' },
@@ -39,7 +51,7 @@ const Header = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-50 bg-white/10 backdrop-blur-md border-b border-white/20">
+    <header className="sticky top-0 z-50 bg-white/20 backdrop-blur-md border-b border-white/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2">
@@ -63,9 +75,12 @@ const Header = () => {
                 <span>{item.name}</span>
               </Link>
             ))}
-             <div className="relative" onMouseLeave={() => setIsServicesOpen(false)}>
+             <div
+                className="relative"
+                onMouseEnter={handleServicesMouseEnter}
+                onMouseLeave={handleServicesMouseLeave}
+              >
                 <button
-                  onMouseEnter={() => setIsServicesOpen(true)}
                   className="flex items-center px-3 py-2 rounded-lg text-black/80 hover:text-black"
                 >
                   <span>Services</span>
@@ -77,13 +92,16 @@ const Header = () => {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute left-0 mt-2 w-56 bg-white/20 backdrop-blur-lg rounded-lg shadow-lg border border-white/30 py-2"
+                    /* --- THIS IS THE CORRECTED STYLE --- */
+                    /* A strong blur (backdrop-blur-xl) is applied ONLY to this dropdown div. */
+                    /* The background is semi-transparent (bg-white/60) to enhance readability. */
+                    className="absolute left-0 mt-2 w-56 bg-white/100 backdrop-blur-xl rounded-xl shadow-2xl border border-white/30 py-2"
                    >
                      {servicesItems.map((item) => (
                        <Link
                          key={item.name}
                          to={item.requiresAuth && !user ? "/signin" : item.path}
-                         className="flex items-center space-x-3 px-4 py-2 text-black hover:bg-black/10"
+                         className="flex items-center space-x-3 px-4 py-2 text-black font-semibold hover:bg-black/10 rounded-lg"
                          onClick={() => setIsServicesOpen(false)}
                        >
                          <item.icon className="h-5 w-5" />
@@ -114,11 +132,12 @@ const Header = () => {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 mt-2 w-48 bg-white/20 backdrop-blur-md rounded-lg shadow-lg border border-white/30 py-2"
+                    /* --- THIS IS ALSO CORRECTED FOR CONSISTENCY --- */
+                    className="absolute right-0 mt-2 w-48 bg-white/60 backdrop-blur-xl rounded-xl shadow-2xl border border-white/30 py-2"
                   >
                     <Link
                       to="/profile"
-                      className="flex items-center space-x-2 px-4 py-2 text-black hover:bg-black/10"
+                      className="flex items-center space-x-2 px-4 py-2 text-black font-semibold hover:bg-black/10 rounded-lg"
                       onClick={() => setIsProfileOpen(false)}
                     >
                       <User className="h-4 w-4" />
@@ -126,7 +145,7 @@ const Header = () => {
                     </Link>
                     <button
                       onClick={logout}
-                      className="flex items-center space-x-2 w-full px-4 py-2 text-red-600 hover:bg-red-500/20"
+                      className="flex items-center space-x-2 w-full px-4 py-2 text-red-600 font-semibold hover:bg-red-500/20 rounded-lg"
                     >
                       <LogOut className="h-4 w-4" />
                       <span>Sign Out</span>
@@ -192,4 +211,3 @@ const Header = () => {
 };
 
 export default Header;
-
