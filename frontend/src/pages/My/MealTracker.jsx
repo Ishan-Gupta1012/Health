@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Leaf, Trash2, Edit, X, Plus, Calendar, BookOpen, BrainCircuit } from 'lucide-react';
+import { Trash2, Edit, X, Plus, Calendar, BookOpen, BrainCircuit } from 'lucide-react';
 import { apiService } from '../../utils/api';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -22,11 +22,12 @@ const MealTracker = () => {
       const mealData = view === 'today'
         ? await apiService.meals.getTodaysMeals()
         : await apiService.meals.getMealHistory();
-      setMeals(mealData);
+      
+      setMeals(mealData?.meals || []); 
 
       if (view === 'today') {
         const adviceData = await apiService.meals.getAIAdvice();
-        setAdvice(adviceData.advice);
+        setAdvice(adviceData?.advice || '');
       }
     } catch (err) {
       setError('Failed to fetch meal data. Please try again later.');
@@ -90,13 +91,24 @@ const MealTracker = () => {
     setEditingMeal({ ...meal });
   };
   
-  const totalCalories = meals.reduce((sum, meal) => sum + (meal.calories || 0), 0);
+  // --- Updated Nutrient Calculation ---
+  const totals = meals.reduce((acc, meal) => {
+    acc.calories += meal.calories || 0;
+    acc.protein += meal.protein || 0;
+    acc.fat += meal.fat || 0;
+    acc.carbohydrates += meal.carbohydrates || 0;
+    return acc;
+  }, { calories: 0, protein: 0, fat: 0, carbohydrates: 0 });
 
-  const macroGoals = {
-    carbs: (totalCalories * 0.4) / 4, // 4 kcal per gram
-    protein: (totalCalories * 0.3) / 4, // 4 kcal per gram
-    fat: (totalCalories * 0.3) / 9, // 9 kcal per gram
+  // Recommended daily goals (simple example)
+  const goals = { calories: 2000, protein: 100, fat: 70, carbohydrates: 250 };
+
+  const getProgressBarWidth = (total, goal) => {
+    if (goal === 0) return '0%';
+    const percentage = (total / goal) * 100;
+    return `${Math.min(percentage, 100)}%`;
   };
+
   
   return (
     <div className="min-h-screen p-4 sm:p-6 md:p-8">
@@ -188,31 +200,6 @@ const MealTracker = () => {
                 }
               </div>
             </motion.div>
-          </div>
-
-          <div className="space-y-6">
-            <motion.div layout className="glass-card p-6 text-center">
-              <h2 className="font-semibold text-black">Total Calories</h2>
-              <p className="text-4xl font-bold text-green-600 my-2">{totalCalories} kcal</p>
-            </motion.div>
-
-            <motion.div layout className="glass-card p-6">
-              <h2 className="font-semibold mb-3 text-black">Macronutrient Breakdown (Estimates)</h2>
-              <div className="space-y-3">
-                <div>
-                    <div className="flex justify-between text-sm mb-1"><span className="font-medium text-black/80">Carbs</span><span className="text-black/80">{macroGoals.carbs.toFixed(0)}g</span></div>
-                    <div className="w-full bg-gray-200/50 rounded-full h-2.5"><div className="bg-green-400 h-2.5 w-[40%] rounded-full"></div></div>
-                </div>
-                <div>
-                    <div className="flex justify-between text-sm mb-1"><span className="font-medium text-black/80">Protein</span><span className="text-black/80">{macroGoals.protein.toFixed(0)}g</span></div>
-                    <div className="w-full bg-gray-200/50 rounded-full h-2.5"><div className="bg-blue-400 h-2.5 w-[30%] rounded-full"></div></div>
-                </div>
-                <div>
-                    <div className="flex justify-between text-sm mb-1"><span className="font-medium text-black/80">Fat</span><span className="text-black/80">{macroGoals.fat.toFixed(0)}g</span></div>
-                    <div className="w-full bg-gray-200/50 rounded-full h-2.5"><div className="bg-yellow-400 h-2.5 w-[30%] rounded-full"></div></div>
-                </div>
-              </div>
-            </motion.div>
 
             {view === 'today' && (
               <motion.div layout className="glass-card p-6">
@@ -220,6 +207,31 @@ const MealTracker = () => {
                 <p className="text-black/80 text-sm leading-relaxed">{advice || 'Log your meals yesterday to see advice here!'}</p>
               </motion.div>
             )}
+          </div>
+
+          <div className="space-y-6">
+            <motion.div layout className="glass-card p-6 text-center">
+              <h2 className="font-semibold text-black">Total Calories</h2>
+              <p className="text-4xl font-bold text-green-600 my-2">{totals.calories} kcal</p>
+            </motion.div>
+
+            <motion.div layout className="glass-card p-6">
+              <h2 className="font-semibold mb-3 text-black">Macronutrient Breakdown (Estimates)</h2>
+              <div className="space-y-3">
+                <div>
+                    <div className="flex justify-between text-sm mb-1"><span className="font-medium text-black/80">Carbs</span><span className="text-black/80">{totals.carbohydrates.toFixed(0)}g</span></div>
+                    <div className="w-full bg-gray-200/50 rounded-full h-2.5"><div className="bg-green-400 h-2.5 rounded-full" style={{ width: getProgressBarWidth(totals.carbohydrates, goals.carbohydrates) }}></div></div>
+                </div>
+                <div>
+                    <div className="flex justify-between text-sm mb-1"><span className="font-medium text-black/80">Protein</span><span className="text-black/80">{totals.protein.toFixed(0)}g</span></div>
+                    <div className="w-full bg-gray-200/50 rounded-full h-2.5"><div className="bg-blue-400 h-2.5 rounded-full" style={{ width: getProgressBarWidth(totals.protein, goals.protein) }}></div></div>
+                </div>
+                <div>
+                    <div className="flex justify-between text-sm mb-1"><span className="font-medium text-black/80">Fat</span><span className="text-black/80">{totals.fat.toFixed(0)}g</span></div>
+                    <div className="w-full bg-gray-200/50 rounded-full h-2.5"><div className="bg-yellow-400 h-2.5 rounded-full" style={{ width: getProgressBarWidth(totals.fat, goals.fat) }}></div></div>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
         
@@ -245,7 +257,7 @@ const MealTracker = () => {
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-black/80 mb-1">Meal Type</label>
-                    <select name="mealType" value={editingMeal.mealType} onChange={(e) => setEditingMeal({...editingMeal, mealType: e.target.value})} className="input">
+                    <select name="mealType" value={editingMeal.mealType} onChange={(e) => setEditingMeal({...editingMeal, mealType: e.g.target.value})} className="input">
                       <option>Breakfast</option>
                       <option>Lunch</option>
                       <option>Dinner</option>

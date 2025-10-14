@@ -43,9 +43,7 @@ const Header = () => {
   const servicesItems = [
     { name: 'Symptom Checker', path: '/symptom-checker', icon: Stethoscope },
     { name: 'Find Doctors', path: '/doctor-finder', icon: Search },
-    { name: 'Medicine Reminders', path: '/medicine-reminders', icon: Calendar, requiresAuth: true },
     { name: 'Medical Records', path: '/medical-records', icon: FileText, requiresAuth: true },
-    { name: 'Prescription Assistant', path: '/prescription-assistant', icon: ClipboardList, requiresAuth: true },
     { name: 'My Meals', path: '/my-meals', icon: ClipboardList, requiresAuth: true },
   ];
 

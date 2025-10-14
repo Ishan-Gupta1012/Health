@@ -2,14 +2,14 @@ const mongoose = require('mongoose');
 
 const mealSchema = new mongoose.Schema({
   userId: {
-    type: String,
-    required: true,
-    ref: 'User'
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
   mealType: {
     type: String,
-    required: true,
-    enum: ['Breakfast', 'Lunch', 'Dinner', 'Snack']
+    enum: ['Breakfast', 'Lunch', 'Dinner', 'Snack'],
+    required: true
   },
   foodItem: {
     type: String,
@@ -19,21 +19,27 @@ const mealSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  calories: {
-    type: Number,
-    required: true,
-    min: 0
-  },
   time: {
     type: String,
     required: true
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-    expires: '7d' // Automatically delete after 7 days
+  // Updated fields to store detailed nutritional info
+  calories: {
+    type: Number,
+    default: 0
+  },
+  protein: {
+    type: Number,
+    default: 0
+  },
+  fat: {
+    type: Number,
+    default: 0
+  },
+  carbohydrates: {
+    type: Number,
+    default: 0
   }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Meal', mealSchema);
-

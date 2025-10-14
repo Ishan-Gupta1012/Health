@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
 // Components
@@ -9,20 +9,59 @@ import LoadingSpinner from './components/LoadingSpinner';
 
 // Pages
 import Home from './pages/Home';
+import About from './pages/About'; // Import the new About page
 import SignIn from './pages/SignIn';
 import SymptomChecker from './pages/SymptomChecker';
 import DoctorFinder from './pages/DoctorFinder';
-import MedicineReminders from './pages/MedicineReminders';
 import MedicalRecords from './pages/MedicalRecords';
 import Profile from './pages/Profile';
-import PrescriptionAssistant from './pages/PrescriptionAssistant'; // New Import
 import MealTracker from './pages/MyMeals/MealTracker';
 
 // Hooks
 import { useAuth } from './hooks/useAuth';
 
+// Layout component to handle conditional footer
+const AppLayout = () => {
+  const location = useLocation();
+  // Show footer on home ('/') and about ('/about') pages
+  const showFooter = location.pathname === '/' || location.pathname === '/about';
+
+  return (
+    <>
+      <Header />
+      <main>
+        <AnimatePresence mode="wait">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} /> {/* Add the new route for About */}
+            <Route path="/signin" element={<AuthWrapper><SignIn /></AuthWrapper>} />
+            <Route path="/symptom-checker" element={<SymptomChecker />} />
+            <Route path="/doctor-finder" element={<DoctorFinder />} />
+            <Route path="/medical-records" element={<ProtectedRoute><MedicalRecords /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/my-meals" element={<ProtectedRoute><MealTracker /></ProtectedRoute>} />
+          </Routes>
+        </AnimatePresence>
+      </main>
+      {/* Conditionally render the Footer */}
+      {showFooter && <Footer />}
+    </>
+  );
+};
+
+// Helper components
+const ProtectedRoute = ({ children }) => {
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/signin" />;
+};
+
+const AuthWrapper = ({ children }) => {
+    const { user } = useAuth();
+    return user ? <Navigate to="/" /> : children;
+};
+
 function App() {
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
 
   if (loading) {
     return (
@@ -35,23 +74,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen">
-        <Header />
-        <main>
-          <AnimatePresence mode="wait">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/signin" element={user ? <Navigate to="/" /> : <SignIn />} />
-              <Route path="/symptom-checker" element={<SymptomChecker />} />
-              <Route path="/doctor-finder" element={<DoctorFinder />} />
-              <Route path="/medicine-reminders" element={user ? <MedicineReminders /> : <Navigate to="/signin" />} />
-              <Route path="/medical-records" element={user ? <MedicalRecords /> : <Navigate to="/signin" />} />
-              <Route path="/prescription-assistant" element={user ? <PrescriptionAssistant /> : <Navigate to="/signin" />} />
-              <Route path="/profile" element={user ? <Profile /> : <Navigate to="/signin" />} />
-              <Route path="/meal-tracker" element={<MealTracker />} />
-            </Routes>
-          </AnimatePresence>
-        </main>
-        <Footer />
+        <AppLayout />
       </div>
     </Router>
   );

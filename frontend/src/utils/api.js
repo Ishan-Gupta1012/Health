@@ -21,6 +21,8 @@ export const getErrorMessage = (error) => {
   return error?.response?.data?.message || error?.message || 'Something went wrong';
 };
 
+// --- API Service Definitions ---
+
 // 🔧 Auth API methods
 export const auth = {
   login: async (data) => {
@@ -30,7 +32,6 @@ export const auth = {
       throw new Error(getErrorMessage(err));
     }
   },
-
   register: async (data) => {
     try {
       return await api.post('/auth/register', data);
@@ -38,7 +39,6 @@ export const auth = {
       throw new Error(getErrorMessage(err));
     }
   },
-
   getProfile: async () => {
     try {
       return await api.get('/auth/profile', { headers: getAuthHeaders() });
@@ -46,7 +46,6 @@ export const auth = {
       throw new Error(getErrorMessage(err));
     }
   },
-
   logout: async () => {
     try {
       return await api.post('/auth/logout', {}, { headers: getAuthHeaders() });
@@ -60,21 +59,24 @@ export const auth = {
 export const reminders = {
   createReminder: async (data) => {
     try {
-      return await api.post('/reminders', data, { headers: getAuthHeaders() });
+      const response = await api.post('/reminders', data, { headers: getAuthHeaders() });
+      return response.data;
     } catch (err) {
       throw new Error(getErrorMessage(err));
     }
   },
   getReminders: async () => {
     try {
-      return await api.get('/reminders', { headers: getAuthHeaders() });
+      const response = await api.get('/reminders', { headers: getAuthHeaders() });
+      return response.data;
     } catch (err) {
       throw new Error(getErrorMessage(err));
     }
   },
   deleteReminder: async (reminderId) => {
     try {
-      return await api.delete(`/reminders/${reminderId}`, { headers: getAuthHeaders() });
+      const response = await api.delete(`/reminders/${reminderId}`, { headers: getAuthHeaders() });
+      return response.data;
     } catch (err) {
       throw new Error(getErrorMessage(err));
     }
@@ -85,99 +87,122 @@ export const reminders = {
 export const records = {
   createRecord: async (formData) => {
     try {
-      return await api.post('/records', formData, {
+      const response = await api.post('/records', formData, {
         headers: {
           ...getAuthHeaders(),
           'Content-Type': 'multipart/form-data',
         }
       });
+      return response.data;
     } catch (err) {
       throw new Error(getErrorMessage(err));
     }
   },
   getRecords: async () => {
     try {
-      return await api.get('/records', { headers: getAuthHeaders() });
+      const response = await api.get('/records', { headers: getAuthHeaders() });
+      return response.data;
     } catch (err) {
       throw new Error(getErrorMessage(err));
     }
   },
   deleteRecord: async (recordId) => {
     try {
-      return await api.delete(`/records/${recordId}`, { headers: getAuthHeaders() });
-    } catch (err) { // <-- THE MISSING BRACE IS NOW ADDED HERE
-      throw new Error(getErrorMessage(err));
-    }
-  },
-
-  meals: {
-    addMeal: async (mealData) => {
-        const res = await fetch(`${BASE_URL}/meals`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...getAuthHeaders(),
-            },
-            body: JSON.stringify(mealData),
-        });
-        return handleResponse(res);
-    },
-    getTodaysMeals: async () => {
-        const res = await fetch(`${BASE_URL}/meals/today`, {
-            headers: getAuthHeaders(),
-        });
-        const data = await handleResponse(res);
-        return data.meals;
-    },
-    getMealHistory: async () => {
-        const res = await fetch(`${BASE_URL}/meals/history`, {
-            headers: getAuthHeaders(),
-        });
-        const data = await handleResponse(res);
-        return data.meals;
-    },
-    updateMeal: async (id, mealData) => {
-        const res = await fetch(`${BASE_URL}/meals/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                ...getAuthHeaders(),
-            },
-            body: JSON.stringify(mealData),
-        });
-        return handleResponse(res);
-    },
-    deleteMeal: async (id) => {
-        const res = await fetch(`${BASE_URL}/meals/${id}`, {
-            method: 'DELETE',
-            headers: getAuthHeaders(),
-        });
-        return handleResponse(res);
-    },
-    getAIAdvice: async () => {
-        const res = await fetch(`${BASE_URL}/meals/advice`, {
-            headers: getAuthHeaders(),
-        });
-        return handleResponse(res);
-    }
-  }
-};
-
-// 🩺 Doctors API methods
-export const doctors = {
-  find: async (specialty, location) => {
-    try {
-      // Use encodeURIComponent to handle specialties with spaces like "General Physician"
-      const encodedSpecialty = encodeURIComponent(specialty);
-      const encodedLocation = encodeURIComponent(location);
-      return await api.get(`/doctors?specialty=${encodedSpecialty}&location=${encodedLocation}`);
+      const response = await api.delete(`/records/${recordId}`, { headers: getAuthHeaders() });
+      return response.data;
     } catch (err) {
       throw new Error(getErrorMessage(err));
     }
   }
 };
 
+// 🍽️ Meals API methods
+export const meals = {
+    addMeal: async (mealData) => {
+        try {
+            const response = await api.post('/meals', mealData, { headers: getAuthHeaders() });
+            return response.data;
+        } catch (err) {
+            throw new Error(getErrorMessage(err));
+        }
+    },
+    getTodaysMeals: async () => {
+        try {
+            const response = await api.get('/meals/today', { headers: getAuthHeaders() });
+            return response.data;
+        } catch (err) {
+            throw new Error(getErrorMessage(err));
+        }
+    },
+    getMealHistory: async () => {
+        try {
+            const response = await api.get('/meals/history', { headers: getAuthHeaders() });
+            return response.data;
+        } catch (err) {
+            throw new Error(getErrorMessage(err));
+        }
+    },
+    updateMeal: async (id, mealData) => {
+        try {
+            const response = await api.put(`/meals/${id}`, mealData, { headers: getAuthHeaders() });
+            return response.data;
+        } catch (err) {
+            throw new Error(getErrorMessage(err));
+        }
+    },
+    deleteMeal: async (id) => {
+        try {
+            const response = await api.delete(`/meals/${id}`, { headers: getAuthHeaders() });
+            return response.data;
+        } catch (err) {
+            throw new Error(getErrorMessage(err));
+        }
+    },
+    getAIAdvice: async () => {
+        try {
+            const response = await api.get('/meals/advice', { headers: getAuthHeaders() });
+            return response.data;
+        } catch (err) {
+            throw new Error(getErrorMessage(err));
+        }
+    }
+};
 
-// 🧩 Centralized API service
-export const apiService = { auth, reminders, records, doctors };
+// 👨‍⚕️ Doctors API methods
+export const doctors = {
+  find: async (specialty, location) => {
+    try {
+      const encodedSpecialty = encodeURIComponent(specialty);
+      const encodedLocation = encodeURIComponent(location);
+      const response = await api.get(`/doctors?specialty=${encodedSpecialty}&location=${encodedLocation}`);
+      return response.data;
+    } catch (err) {
+      throw new Error(getErrorMessage(err));
+    }
+  }
+};
+
+// 🤖 Chatbot API methods
+export const chatbot = {
+    getGeminiReply: async (data) => {
+        try {
+            const response = await api.post('/chatbot/gemini', data, { headers: getAuthHeaders() });
+            return response.data;
+        } catch (err) {
+            throw new Error(getErrorMessage(err));
+        }
+    },
+    analyzeMeal: async (data) => {
+        try {
+            const response = await api.post('/chatbot/meal', data, { headers: getAuthHeaders() });
+            return response.data;
+        } catch (err) {
+            throw new Error(getErrorMessage(err));
+        }
+    }
+};
+
+// 🧩 Centralized API service (FIXED: `chatbot` is now correctly included)
+export const apiService = { auth, reminders, records, meals, doctors, chatbot };
+
 export default apiService;

@@ -9,36 +9,41 @@ const genAI = process.env.GEMINI_API_KEY
   ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
   : null;
 
-// --- Helper Functions ---
-
-// Get calorie estimate from Gemini
-const getCalorieEstimate = async (foodItem, quantity) => {
+// --- Helper Function to get nutritional data ---
+const getNutritionalData = async (foodItem, quantity) => {
+  const defaultNutrition = { calories: 150, protein: 5, fat: 5, carbohydrates: 20 };
+  
   if (!genAI) {
-    console.warn('Gemini API key not found. Returning a default of 150 calories.');
-    // Returning a non-zero default so it's obvious on the frontend if the API key is missing
-    return 150;
+    console.warn('Gemini API key not found. Returning default nutritional data.');
+    return defaultNutrition;
   }
+
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const prompt = `Provide a numerical estimate of the calories in "${quantity} of ${foodItem}". Respond with only the number, no units or extra text.`;
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    const prompt = `Provide a JSON object with nutritional estimates for "${quantity} of ${foodItem}". The JSON object should have four keys: "calories", "protein", "fat", and "carbohydrates". The values should be numbers only. Example: {"calories": 300, "protein": 20, "fat": 15, "carbohydrates": 25}`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text().trim();
+    
+    // Clean the response to ensure it's valid JSON
+    const jsonString = text.replace(/```json/g, '').replace(/```/g, '');
+    const data = JSON.parse(jsonString);
 
-    const calories = parseInt(text, 10);
-    // If parsing fails, return a default value and log the issue
-    if (isNaN(calories)) {
-      console.error('Failed to parse calories from Gemini response:', text);
-      return 150;
+    // Validate the response
+    if (typeof data.calories !== 'number' || typeof data.protein !== 'number' || typeof data.fat !== 'number' || typeof data.carbohydrates !== 'number') {
+      console.error('Invalid JSON structure from Gemini response:', data);
+      return defaultNutrition;
     }
-    return calories;
+    
+    return data;
+
   } catch (error) {
-    console.error('Error fetching calorie estimate from Gemini API:', error.message);
-    // Return a default value in case of an API error
-    return 150;
+    console.error('Error fetching nutritional data from Gemini API:', error.message);
+    return defaultNutrition;
   }
 };
+
 
 // --- API Routes ---
 
@@ -50,7 +55,7 @@ router.post('/', verifyToken, async (req, res) => {
       return res.status(400).json({ message: 'All meal fields are required.' });
     }
 
-    const calories = await getCalorieEstimate(foodItem, quantity);
+    const nutritionalData = await getNutritionalData(foodItem, quantity);
 
     const newMeal = new Meal({
       userId: req.userId,
@@ -58,7 +63,7 @@ router.post('/', verifyToken, async (req, res) => {
       foodItem,
       quantity,
       time,
-      calories
+      ...nutritionalData // Spread the detailed nutritional data
     });
 
     await newMeal.save();
@@ -67,6 +72,38 @@ router.post('/', verifyToken, async (req, res) => {
     res.status(500).json({ message: 'Failed to add meal', error: error.message });
   }
 });
+
+// Update a meal
+router.put('/:id', verifyToken, async (req, res) => {
+    try {
+        const { mealType, foodItem, quantity, time } = req.body;
+
+        const meal = await Meal.findOne({ _id: req.params.id, userId: req.userId });
+        if (!meal) {
+            return res.status(404).json({ message: 'Meal not found.' });
+        }
+
+        const nutritionalData = await getNutritionalData(foodItem, quantity);
+
+        meal.mealType = mealType;
+        meal.foodItem = foodItem;
+        meal.quantity = quantity;
+        meal.time = time;
+        meal.calories = nutritionalData.calories;
+        meal.protein = nutritionalData.protein;
+        meal.fat = nutritionalData.fat;
+        meal.carbohydrates = nutritionalData.carbohydrates;
+
+        const updatedMeal = await meal.save();
+        res.json({ message: 'Meal updated successfully', meal: updatedMeal });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to update meal', error: error.message });
+    }
+});
+
+
+// --- Other routes remain the same ---
 
 // Get today's meals
 router.get('/today', verifyToken, async (req, res) => {
@@ -105,8 +142,7 @@ router.get('/history', verifyToken, async (req, res) => {
     }
 });
 
-
-// Get AI-powered health advice based on yesterday's meals
+// Get AI-powered health advice
 router.get('/advice', verifyToken, async (req, res) => {
     if (!genAI) {
         return res.json({ advice: 'AI advice is currently unavailable. Please check your API key.' });
@@ -130,8 +166,24 @@ router.get('/advice', verifyToken, async (req, res) => {
         const totalCalories = meals.reduce((sum, meal) => sum + meal.calories, 0);
         const mealSummary = meals.map(m => `${m.mealType}: ${m.quantity} of ${m.foodItem} (~${m.calories} kcal)`).join('\n');
 
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-        const prompt = `Based on the following meal log from yesterday, provide a short, single-paragraph of personalized health advice. Total calories consumed were ${totalCalories}.\n\nMeals:\n${mealSummary}\n\nAdvice:`;
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+        const prompt = `You are a professional AI nutrition and wellness assistant. The user has logged their meals for the day.
+
+### TASK:
+Analyze the user's full-day meal data and generate a health summary in two short paragraphs.
+
+1️⃣ In the **first paragraph**, briefly estimate:
+- The user's approximate **blood sugar** and **blood pressure** fluctuation (increase, decrease, or stable) 
+- Base this estimation on sugar, sodium, and fat content in the meals.
+
+2️⃣ In the **second paragraph**, provide personalized **nutrition advice**, including:
+- Which nutrients (protein, fiber, vitamins, carbs, fats) the user should increase or decrease
+- What kind of foods would help improve balance (e.g., “add more leafy vegetables”, “reduce fried foods”, “include fruits with low glycemic index”)
+
+### OUTPUT FORMAT:
+Keep the tone friendly and professional.
+Output should be exactly two paragraphs — no bullet points, no numbering.
+ Total calories consumed were ${totalCalories}.\n\nMeals:\n${mealSummary}\n\nAdvice:`;
 
         const result = await model.generateContent(prompt);
         const response = await result.response;
@@ -141,32 +193,6 @@ router.get('/advice', verifyToken, async (req, res) => {
     } catch (error) {
         console.error('Error fetching AI advice:', error.message);
         res.status(500).json({ message: 'Failed to generate AI advice.' });
-    }
-});
-
-// Update a meal
-router.put('/:id', verifyToken, async (req, res) => {
-    try {
-        const { mealType, foodItem, quantity, time } = req.body;
-
-        const meal = await Meal.findOne({ _id: req.params.id, userId: req.userId });
-        if (!meal) {
-            return res.status(404).json({ message: 'Meal not found.' });
-        }
-
-        const calories = await getCalorieEstimate(foodItem, quantity);
-
-        meal.mealType = mealType;
-        meal.foodItem = foodItem;
-        meal.quantity = quantity;
-        meal.time = time;
-        meal.calories = calories;
-
-        const updatedMeal = await meal.save();
-        res.json({ message: 'Meal updated successfully', meal: updatedMeal });
-
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to update meal', error: error.message });
     }
 });
 
