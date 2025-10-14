@@ -145,6 +145,23 @@ export const AuthProvider = ({ children }) => {
       });
   };
 
+  const updateProfile = async (updates) => {
+    try {
+      const response = await apiService.auth.updateProfile(updates);
+      const { user: updatedUser } = response.data;
+
+      // Update local storage and state
+      localStorage.setItem('healthnest_user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+
+      return { success: true, user: updatedUser };
+    } catch (error) {
+      const message = error?.message || 'Profile update failed';
+      console.error("Profile Update Error:", message);
+      return { success: false, error: message };
+    }
+  };
+
   const logout = async () => {
     try {
       await signOut(auth);
@@ -166,6 +183,7 @@ export const AuthProvider = ({ children }) => {
     register,
     loginWithGoogle,
     logout,
+    updateProfile,
     isAuthenticated: !!user,
   };
 

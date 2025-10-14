@@ -67,7 +67,8 @@ const generateToken = (userId) => {
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, name, phone, dateOfBirth, gender } = req.body;
+    // UPDATED: Include new profile fields
+    const { email, password, name, phone, dateOfBirth, gender, heightFt, heightIn, weightKg } = req.body;
 
     if (!email || !password || !name) {
       return res.status(400).json({ message: 'Email, password, and name are required' });
@@ -76,14 +77,27 @@ router.post('/register', async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'User already exists with this email' });
 
-    const user = new User({ email, password, name, phone, dateOfBirth, gender });
+    // UPDATED: Pass new fields to User constructor
+    const user = new User({ email, password, name, phone, dateOfBirth, gender, heightFt, heightIn, weightKg });
     await user.save();
 
     const token = generateToken(user.userId);
 
+    // Ensure all user data is returned to the frontend
     res.status(201).json({
       message: 'User registered successfully',
-      user: { userId: user.userId, email: user.email, name: user.name, avatar: user.avatar },
+      user: { 
+        userId: user.userId, 
+        email: user.email, 
+        name: user.name, 
+        avatar: user.avatar, 
+        phone: user.phone,
+        dateOfBirth: user.dateOfBirth,
+        gender: user.gender,
+        heightFt: user.heightFt,
+        heightIn: user.heightIn,
+        weightKg: user.weightKg,
+      },
       token
     });
   } catch (error) {
@@ -105,9 +119,21 @@ router.post('/login', async (req, res) => {
 
     const token = generateToken(user.userId);
 
+    // UPDATED: Ensure all user data is returned to the frontend
     res.json({
       message: 'Login successful',
-      user: { userId: user.userId, email: user.email, name: user.name, avatar: user.avatar },
+      user: { 
+        userId: user.userId, 
+        email: user.email, 
+        name: user.name, 
+        avatar: user.avatar,
+        phone: user.phone,
+        dateOfBirth: user.dateOfBirth,
+        gender: user.gender,
+        heightFt: user.heightFt,
+        heightIn: user.heightIn,
+        weightKg: user.weightKg,
+      },
       token
     });
   } catch (error) {
@@ -158,6 +184,7 @@ router.get('/profile', verifyToken, async (req, res) => {
 router.put('/profile', verifyToken, async (req, res) => {
   try {
     const updates = req.body;
+    // Prevent sensitive fields from being updated via this route
     delete updates.password;
     delete updates.email;
 
@@ -175,7 +202,7 @@ router.put('/profile', verifyToken, async (req, res) => {
 });
 
 // --------------------
-// ✅ Export Only Router
+// Export
 // --------------------
-module.exports = router; // <- FIXED
-module.exports.verifyToken = verifyToken; // optional, can import separately
+module.exports = router; 
+module.exports.verifyToken = verifyToken;

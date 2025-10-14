@@ -15,7 +15,8 @@ import SymptomChecker from './pages/SymptomChecker';
 import DoctorFinder from './pages/DoctorFinder';
 import MedicalRecords from './pages/MedicalRecords';
 import Profile from './pages/Profile';
-import MealTracker from './pages/MyMeals/MealTracker';
+// FIX: Corrected the path from './pages/MyMeals/MealTracker' to './pages/My/MealTracker'
+import MealTracker from './pages/My/MealTracker'; 
 
 // Hooks
 import { useAuth } from './hooks/useAuth';

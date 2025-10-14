@@ -43,6 +43,20 @@ const userSchema = new mongoose.Schema({
     enum: ['male', 'female', 'other'],
     default: 'other'
   },
+  // ADDED: Height and Weight fields
+  heightFt: {
+    type: Number,
+    min: 0
+  },
+  heightIn: {
+    type: Number,
+    min: 0,
+    max: 11
+  },
+  weightKg: {
+    type: Number,
+    min: 0
+  },
   medicalHistory: [{
     condition: String,
     diagnosedDate: Date,

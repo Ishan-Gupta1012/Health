@@ -46,6 +46,13 @@ export const auth = {
       throw new Error(getErrorMessage(err));
     }
   },
+  updateProfile: async (data) => {
+    try {
+      return await api.put('/auth/profile', data, { headers: getAuthHeaders() });
+    } catch (err) {
+      throw new Error(getErrorMessage(err));
+    }
+  },
   logout: async () => {
     try {
       return await api.post('/auth/logout', {}, { headers: getAuthHeaders() });
