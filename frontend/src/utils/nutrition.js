@@ -34,15 +34,20 @@ function heightToCm(ft, inch) {
     return totalInches * 2.54; // 1 inch = 2.54 cm
 }
 
-export function calculateNutritionGoals(user) {
+/**
+ * Calculates a user's daily nutrition goals (TDEE and Macros).
+ * Renamed from calculateNutritionGoals to match MealTracker.jsx import.
+ */
+export function getNutritionGoals(user) {
     // Check for essential data
     if (!user || !user.weightKg || !user.dateOfBirth || !user.gender || !user.heightFt) {
+        // Fallback default goals to prevent UI crash
         return { 
-            tdee: 0, 
-            protein: 0, 
-            carbs: 0, 
-            fat: 0, 
-            message: "Missing height, weight, age, or gender data in profile for calculation." 
+            calories: 2000, 
+            protein: 150, 
+            carbs: 200, 
+            fat: 60, 
+            message: "Missing height, weight, age, or gender data in profile for calculation. Using default goals." 
         };
     }
 
@@ -55,7 +60,7 @@ export function calculateNutritionGoals(user) {
     let bmr;
     if (gender === 'male') {
         bmr = (10 * weight) + (6.25 * heightCm) - (5 * age) + 5;
-    } else { // female or other (using female as default since it's more conservative)
+    } else { // female
         bmr = (10 * weight) + (6.25 * heightCm) - (5 * age) - 161;
     }
 
@@ -72,10 +77,37 @@ export function calculateNutritionGoals(user) {
     const carbsGrams = Math.round(carbsCal / CALORIES_PER_GRAM.CARBS);
     
     return {
-        tdee, // Max Calories
+        calories: tdee, // Renamed from tdee to calories for clarity in the UI
         protein: proteinGrams,
         carbs: carbsGrams,
         fat: fatGrams,
         message: "Goals calculated based on Mifflin-St Jeor formula and Moderate Activity factor (1.55)."
     };
+}
+
+/**
+ * Calculates the total nutrition consumed from an array of meals.
+ * @param {Array} meals - An array of meal objects.
+ * @returns {{totalCalories: number, protein: number, carbs: number, fat: number}}
+ */
+export function calculateDailyNutrition(meals) {
+    return meals.reduce((acc, meal) => {
+        // Ensure properties exist and are numbers, falling back to 0
+        acc.totalCalories += Number(meal.calories) || 0;
+        acc.protein += Number(meal.protein) || 0;
+        acc.carbs += Number(meal.carbs) || 0;
+        acc.fat += Number(meal.fat) || 0;
+        return acc;
+    }, { totalCalories: 0, protein: 0, carbs: 0, fat: 0 });
+}
+
+/**
+ * Calculates the percentage of a goal reached.
+ * @param {number} current - The current value.
+ * @param {number} goal - The goal value.
+ * @returns {number} The percentage (0-100+).
+ */
+export function calculateProgress(current, goal) {
+    if (!goal || goal === 0) return 0;
+    return (current / goal) * 100;
 }

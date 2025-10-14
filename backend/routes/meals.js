@@ -103,7 +103,37 @@ router.put('/:id', verifyToken, async (req, res) => {
 });
 
 
-// --- Other routes remain the same ---
+// NEW ROUTE: Get meals for a specific date (used by MealTracker.jsx)
+// Endpoint: GET /api/meals/user?date=YYYY-MM-DD
+router.get('/user', verifyToken, async (req, res) => {
+  try {
+    const { date } = req.query;
+
+    if (!date) {
+      return res.status(400).json({ message: 'Date query parameter is required.' });
+    }
+
+    // Set the start and end of the specified day
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const meals = await Meal.find({
+      userId: req.userId,
+      // Query documents created within the 24-hour window of the selected date
+      createdAt: { $gte: startOfDay, $lt: endOfDay } 
+    }).sort({ createdAt: 'asc' });
+
+    // Return the meals in a consistent format
+    res.json(meals);
+  } catch (error) {
+    console.error('Failed to fetch user meals by date:', error.message);
+    res.status(500).json({ message: 'Failed to fetch user meals by date', error: error.message });
+  }
+});
+
 
 // Get today's meals
 router.get('/today', verifyToken, async (req, res) => {
@@ -118,7 +148,7 @@ router.get('/today', verifyToken, async (req, res) => {
       createdAt: { $gte: today, $lt: tomorrow }
     }).sort({ createdAt: 'asc' });
 
-    res.json({ meals });
+    res.json(meals); // Changed from { meals } to just meals for consistency with the new route
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch today\'s meals', error: error.message });
   }
@@ -136,7 +166,7 @@ router.get('/history', verifyToken, async (req, res) => {
             createdAt: { $gte: sevenDaysAgo }
         }).sort({ createdAt: 'desc' });
 
-        res.json({ meals });
+        res.json(meals); // Changed from { meals } to just meals for consistency with the new route
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch meal history', error: error.message });
     }

@@ -172,6 +172,17 @@ export const meals = {
         } catch (err) {
             throw new Error(getErrorMessage(err));
         }
+    },
+    // NEW FUNCTION: Fetch meals for a specific date
+    getMealsByDate: async (date) => {
+        try {
+            // Call the new backend endpoint
+            const response = await api.get(`/meals/user?date=${date}`, { headers: getAuthHeaders() });
+            // The backend returns the array of meals directly
+            return response.data; 
+        } catch (err) {
+            throw new Error(getErrorMessage(err));
+        }
     }
 };
 
@@ -209,7 +220,7 @@ export const chatbot = {
     }
 };
 
-// 🧩 Centralized API service (FIXED: `chatbot` is now correctly included)
+// 🧩 Centralized API service
 export const apiService = { auth, reminders, records, meals, doctors, chatbot };
 
 export default apiService;

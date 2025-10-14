@@ -1,200 +1,293 @@
-// frontend/src/pages/My/MealTracker.jsx
-
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { useAuth } from '../../hooks/useAuth';
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Trash2, Edit, X, Plus, Calendar, BookOpen, BrainCircuit } from 'lucide-react';
 import { apiService } from '../../utils/api';
-// Assuming you have defined useNutritionGoals in frontend/src/hooks/useNutritionGoals.js
-import { useNutritionGoals } from '../../hooks/useNutritionGoals'; 
-import { PlusCircle, Utensils } from 'lucide-react';
-import LoadingSpinner from '../../components/LoadingSpinner'; 
-
-// Helper component for goal visualization
-const GoalProgress = ({ label, consumed, max, unit, color }) => {
-    // If max is 0 (due to missing profile data), set percentage to 0 to avoid errors
-    const percentage = max > 0 ? Math.min(100, (consumed / max) * 100) : 0;
-    const isExceeded = consumed > max && max > 0;
-
-    return (
-        <div className="space-y-1">
-            <div className="flex justify-between text-sm font-medium">
-                <span className={`text-${color}-700`}>{label}</span>
-                <span className={isExceeded ? 'text-red-500 font-bold' : 'text-gray-700'}>
-                    {consumed} / {max} {unit}
-                </span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                    className={`h-2 rounded-full transition-all duration-500 ${isExceeded ? 'bg-red-500' : `bg-${color}-500`}`} 
-                    style={{ width: `${percentage}%` }}
-                ></div>
-            </div>
-            {isExceeded && <p className="text-xs text-red-500">Goal exceeded!</p>}
-        </div>
-    );
-};
-
+import { useAuth } from '../../hooks/useAuth';
 
 const MealTracker = () => {
-    const { user } = useAuth();
-    // Use nutrition goals hook to get TDEE and macro goals
-    const { goals, loading: goalsLoading } = useNutritionGoals(); 
-    const [todaysMeals, setTodaysMeals] = useState([]);
-    const [mealsLoading, setMealsLoading] = useState(true);
-    const [error, setError] = useState(null);
-    
-    // State for consumed totals (initialized to 0)
-    const [consumed, setConsumed] = useState({
-        calories: 0,
-        protein: 0,
-        carbs: 0,
-        fat: 0,
-    });
+  const [meals, setMeals] = useState([]);
+  const [newMeal, setNewMeal] = useState({ mealType: 'Breakfast', foodItem: '', quantity: '', time: '' });
+  const [advice, setAdvice] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [view, setView] = useState('today'); // 'today' or 'history'
+  const [editingMeal, setEditingMeal] = useState(null);
+  const { user } = useAuth();
 
-    // Fetch meal data
-    useEffect(() => {
-        const fetchMeals = async () => {
-            try {
-                setMealsLoading(true);
-                const response = await apiService.meals.getTodaysMeals(); 
-                const meals = response.meals || [];
-                setTodaysMeals(meals);
-                
-                // Calculate total consumption from fetched meals
-                const calculatedConsumption = meals.reduce((totals, meal) => {
-                    totals.calories += meal.calories || 0;
-                    totals.protein += meal.protein || 0;
-                    totals.carbs += meal.carbs || 0;
-                    totals.fat += meal.fat || 0;
-                    return totals;
-                }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+  const fetchData = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    setError('');
+    try {
+      const mealData = view === 'today'
+        ? await apiService.meals.getTodaysMeals()
+        : await apiService.meals.getMealHistory();
+      
+      setMeals(mealData?.meals || []); 
 
-                setConsumed(calculatedConsumption);
-                setError(null);
-            } catch (err) {
-                console.error("Meal fetch error:", err);
-                setError("Failed to load today's meals.");
-            } finally {
-                setMealsLoading(false);
-            }
-        };
-        fetchMeals();
-    }, [user]);
-    
-    if (mealsLoading || goalsLoading) {
-        return <LoadingSpinner size="large" className="min-h-screen" />;
+      if (view === 'today') {
+        const adviceData = await apiService.meals.getAIAdvice();
+        setAdvice(adviceData?.advice || '');
+      }
+    } catch (err) {
+      setError('Failed to fetch meal data. Please try again later.');
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
+  }, [view, user]);
 
-    // Assign goals from the hook
-    const calorieGoal = goals.tdee;
-    const proteinGoal = goals.protein;
-    const carbsGoal = goals.carbs;
-    const fatGoal = goals.fat;
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            // Standard centered and padded container for the UI
-            className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8" 
-        >
-            <div className="max-w-7xl mx-auto">
-                <h1 className="text-4xl font-bold text-gray-900 mb-6 flex items-center">
-                    <Utensils className="w-8 h-8 mr-3 text-green-600" />
-                    Daily Meal Tracker
-                </h1>
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewMeal(prev => ({ ...prev, [name]: value }));
+  };
 
-                {/* Macro/Calorie Goals Overview Card (NEW FEATURE DISPLAY) */}
-                <div className="bg-white shadow-xl rounded-xl p-6 mb-8 border border-gray-100">
-                    <h2 className="text-2xl font-bold text-green-600 mb-4">Your Nutrition Goals</h2>
-                    {goals.tdee > 0 ? (
-                        <div className="space-y-4">
-                            
-                            {/* Calorie Goal */}
-                            <GoalProgress 
-                                label="Total Calories" 
-                                consumed={consumed.calories} 
-                                max={calorieGoal} 
-                                unit="kcal" 
-                                color="green"
-                            />
-                            
-                            {/* Macronutrients Goals */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-                                <GoalProgress 
-                                    label="Protein" 
-                                    consumed={consumed.protein} 
-                                    max={proteinGoal} 
-                                    unit="g" 
-                                    color="blue"
-                                />
-                                <GoalProgress 
-                                    label="Carbohydrates" 
-                                    consumed={consumed.carbs} 
-                                    max={carbsGoal} 
-                                    unit="g" 
-                                    color="orange"
-                                />
-                                <GoalProgress 
-                                    label="Fats" 
-                                    consumed={consumed.fat} 
-                                    max={fatGoal} 
-                                    unit="g" 
-                                    color="pink"
-                                />
-                            </div>
+  const handleAddMeal = async (e) => {
+    e.preventDefault();
+    if (!newMeal.foodItem || !newMeal.quantity || !newMeal.time) {
+      setError('Please fill in all fields to add a meal.');
+      return;
+    }
+    setError('');
+    try {
+      await apiService.meals.addMeal(newMeal);
+      setNewMeal({ mealType: 'Breakfast', foodItem: '', quantity: '', time: '' });
+      fetchData(); // Refresh list
+    } catch (err) {
+      setError('Failed to add meal.');
+      console.error(err);
+    }
+  };
 
-                            <p className="text-sm text-gray-500 pt-2">
-                                {goals.message}
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="text-red-500 p-4 bg-red-50 rounded-lg">
-                            <p className="font-semibold">Calculation Error:</p>
-                            <p>{goals.message} Please ensure your **Date of Birth, Gender, Height, and Weight (in kg)** are entered in your Profile section.</p>
-                        </div>
-                    )}
-                </div>
+  const handleDeleteMeal = async (id) => {
+    try {
+      await apiService.meals.deleteMeal(id);
+      setMeals(prevMeals => prevMeals.filter(meal => meal._id !== id));
+    } catch (err) {
+      setError('Failed to delete meal.');
+      console.error(err);
+    }
+  };
+  
+  const handleUpdateMeal = async (e) => {
+    e.preventDefault();
+    if (!editingMeal) return;
+    setError('');
+    try {
+      await apiService.meals.updateMeal(editingMeal._id, editingMeal);
+      setEditingMeal(null);
+      fetchData(); // Refresh list
+    } catch (err) {
+      setError('Failed to update meal.');
+      console.error(err);
+    }
+  };
 
-                {/* Meal List and Add Meal Section */}
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">Today's Meals ({todaysMeals.length})</h2>
-                    <button className="btn-primary flex items-center px-4 py-2">
-                        <PlusCircle className="w-5 h-5 mr-2" />
-                        Log New Meal
-                    </button>
-                </div>
+  const openEditModal = (meal) => {
+    setEditingMeal({ ...meal });
+  };
+  
+  // --- Updated Nutrient Calculation ---
+  const totals = meals.reduce((acc, meal) => {
+    acc.calories += meal.calories || 0;
+    acc.protein += meal.protein || 0;
+    acc.fat += meal.fat || 0;
+    acc.carbohydrates += meal.carbohydrates || 0;
+    return acc;
+  }, { calories: 0, protein: 0, fat: 0, carbohydrates: 0 });
 
-                {error && <div className="text-red-500 p-3 bg-red-100 rounded-lg">{error}</div>}
+  // Recommended daily goals (simple example)
+  const goals = { calories: 2000, protein: 100, fat: 70, carbohydrates: 250 };
 
-                {todaysMeals.length > 0 ? (
-                    <div className="space-y-4">
-                        {todaysMeals.map((meal, index) => (
-                            <motion.div 
-                                key={index} 
-                                initial={{ opacity: 0, x: -10 }} 
-                                animate={{ opacity: 1, x: 0 }} 
-                                transition={{ delay: index * 0.05 }}
-                                className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition"
-                            >
-                                <div className="flex items-center justify-between">
-                                    <h3 className="font-semibold text-lg">{meal.name || `Meal ${index + 1}`}</h3>
-                                    <span className="text-gray-500 text-sm">{meal.time || 'Time Not Specified'}</span>
-                                </div>
-                                <p className="text-gray-700 text-xl font-bold mt-1">{meal.calories} kcal</p>
-                                <p className="text-sm text-gray-600 mt-2">Macros: {meal.protein}g Protein | {meal.carbs}g Carbs | {meal.fat}g Fat</p>
-                            </motion.div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center p-10 bg-white rounded-xl border border-gray-200">
-                        <Utensils className="w-10 h-10 mx-auto text-gray-400 mb-4" />
-                        <p className="text-gray-600">No meals logged today. Click "Log New Meal" to start tracking!</p>
-                    </div>
-                )}
-            </div>
+  const getProgressBarWidth = (total, goal) => {
+    if (goal === 0) return '0%';
+    const percentage = (total / goal) * 100;
+    return `${Math.min(percentage, 100)}%`;
+  };
+
+  
+  return (
+    <div className="min-h-screen p-4 sm:p-6 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <h1 className="text-4xl font-bold text-black mb-2">Daily Nutrition Tracker</h1>
+          <p className="text-black/80 mb-6">Log your meals to keep track of your diet and get AI-powered insights.</p>
         </motion.div>
-    );
+
+        {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4" role="alert">{error}</div>}
+        
+        <div className="flex space-x-2 mb-6">
+            <button onClick={() => setView('today')} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${view === 'today' ? 'bg-green-500 text-white shadow' : 'bg-white/50 text-black hover:bg-white/70'}`}>
+                <Calendar className="inline-block w-4 h-4 mr-2"/>Today's Log
+            </button>
+            <button onClick={() => setView('history')} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${view === 'history' ? 'bg-green-500 text-white shadow' : 'bg-white/50 text-black hover:bg-white/70'}`}>
+                <BookOpen className="inline-block w-4 h-4 mr-2"/>7-Day History
+            </button>
+        </div>
+
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            {view === 'today' && (
+              <motion.div layout className="glass-card p-6">
+                <h2 className="text-xl font-semibold mb-4 text-black">Add a New Meal</h2>
+                <form onSubmit={handleAddMeal} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-black/80 mb-1">Meal Type</label>
+                      <select name="mealType" value={newMeal.mealType} onChange={handleInputChange} className="input">
+                        <option>Breakfast</option>
+                        <option>Lunch</option>
+                        <option>Dinner</option>
+                        <option>Snack</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-black/80 mb-1">Time</label>
+                      <input type="time" name="time" value={newMeal.time} onChange={handleInputChange} className="input" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-black/80 mb-1">Food Item</label>
+                    <input type="text" name="foodItem" value={newMeal.foodItem} onChange={handleInputChange} placeholder="e.g., Oatmeal with berries" className="input" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-black/80 mb-1">Quantity</label>
+                    <input type="text" name="quantity" value={newMeal.quantity} onChange={handleInputChange} placeholder="e.g., 1 cup" className="input" />
+                  </div>
+                  <button type="submit" className="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center justify-center">
+                    <Plus className="w-5 h-5 mr-2"/> Add Meal
+                  </button>
+                </form>
+              </motion.div>
+            )}
+
+            <motion.div layout className="glass-card p-6">
+              <h2 className="text-xl font-semibold mb-4 text-black">{view === 'today' ? "Today's Meal Log" : "Meal History"}</h2>
+              <div className="overflow-x-auto">
+                {loading ? <p className="text-center text-black/70">Loading meals...</p> : meals.length === 0 ? <p className="text-center text-black/70">No meals logged for this period.</p> :
+                  <table className="min-w-full text-sm text-black">
+                    <thead className="bg-black/10">
+                      <tr>
+                        <th className="p-3 text-left font-semibold">Meal Type</th>
+                        <th className="p-3 text-left font-semibold">Food Item</th>
+                        <th className="p-3 text-left font-semibold">Quantity</th>
+                        <th className="p-3 text-left font-semibold">Time</th>
+                        <th className="p-3 text-left font-semibold">Calories</th>
+                        <th className="p-3 text-center font-semibold">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {meals.map(meal => (
+                        <tr key={meal._id} className="border-b border-black/10 hover:bg-black/5">
+                          <td className="p-3">{meal.mealType}</td>
+                          <td className="p-3">{meal.foodItem}</td>
+                          <td className="p-3">{meal.quantity}</td>
+                          <td className="p-3">{meal.time}</td>
+                          <td className="p-3 font-medium">~{meal.calories} kcal</td>
+                          <td className="p-3 text-center">
+                            <button onClick={() => openEditModal(meal)} className="text-blue-600 hover:text-blue-800 mr-2"><Edit size={16}/></button>
+                            <button onClick={() => handleDeleteMeal(meal._id)} className="text-red-500 hover:text-red-700"><Trash2 size={16}/></button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                }
+              </div>
+            </motion.div>
+
+            {view === 'today' && (
+              <motion.div layout className="glass-card p-6">
+                <h2 className="font-semibold mb-3 text-black flex items-center"><BrainCircuit className="w-5 h-5 mr-2 text-green-600"/>Personalized Health Advice</h2>
+                <p className="text-black/80 text-sm leading-relaxed">{advice || 'Log your meals yesterday to see advice here!'}</p>
+              </motion.div>
+            )}
+          </div>
+
+          <div className="space-y-6">
+            <motion.div layout className="glass-card p-6 text-center">
+              <h2 className="font-semibold text-black">Total Calories</h2>
+              <p className="text-4xl font-bold text-green-600 my-2">{totals.calories} kcal</p>
+            </motion.div>
+
+            <motion.div layout className="glass-card p-6">
+              <h2 className="font-semibold mb-3 text-black">Macronutrient Breakdown (Estimates)</h2>
+              <div className="space-y-3">
+                <div>
+                    <div className="flex justify-between text-sm mb-1"><span className="font-medium text-black/80">Carbs</span><span className="text-black/80">{totals.carbohydrates.toFixed(0)}g</span></div>
+                    <div className="w-full bg-gray-200/50 rounded-full h-2.5"><div className="bg-green-400 h-2.5 rounded-full" style={{ width: getProgressBarWidth(totals.carbohydrates, goals.carbohydrates) }}></div></div>
+                </div>
+                <div>
+                    <div className="flex justify-between text-sm mb-1"><span className="font-medium text-black/80">Protein</span><span className="text-black/80">{totals.protein.toFixed(0)}g</span></div>
+                    <div className="w-full bg-gray-200/50 rounded-full h-2.5"><div className="bg-blue-400 h-2.5 rounded-full" style={{ width: getProgressBarWidth(totals.protein, goals.protein) }}></div></div>
+                </div>
+                <div>
+                    <div className="flex justify-between text-sm mb-1"><span className="font-medium text-black/80">Fat</span><span className="text-black/80">{totals.fat.toFixed(0)}g</span></div>
+                    <div className="w-full bg-gray-200/50 rounded-full h-2.5"><div className="bg-yellow-400 h-2.5 rounded-full" style={{ width: getProgressBarWidth(totals.fat, goals.fat) }}></div></div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+        
+        <p className="text-center text-xs text-black/60 mt-8">
+            This information is for general guidance only and does not substitute professional medical advice. Always consult with a healthcare provider for personalized health recommendations.
+        </p>
+      </div>
+
+      <AnimatePresence>
+        {editingMeal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          >
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="glass-card w-full max-w-lg p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-black">Edit Meal</h2>
+                <button onClick={() => setEditingMeal(null)} className="text-black/50 hover:text-black"><X /></button>
+              </div>
+              <form onSubmit={handleUpdateMeal} className="space-y-4">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-black/80 mb-1">Meal Type</label>
+                    <select name="mealType" value={editingMeal.mealType} onChange={(e) => setEditingMeal({...editingMeal, mealType: e.g.target.value})} className="input">
+                      <option>Breakfast</option>
+                      <option>Lunch</option>
+                      <option>Dinner</option>
+                      <option>Snack</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-black/80 mb-1">Time</label>
+                    <input type="time" name="time" value={editingMeal.time} onChange={(e) => setEditingMeal({...editingMeal, time: e.target.value})} className="input" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-black/80 mb-1">Food Item</label>
+                  <input type="text" name="foodItem" value={editingMeal.foodItem} onChange={(e) => setEditingMeal({...editingMeal, foodItem: e.target.value})} className="input" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-black/80 mb-1">Quantity</label>
+                  <input type="text" name="quantity" value={editingMeal.quantity} onChange={(e) => setEditingMeal({...editingMeal, quantity: e.target.value})} className="input" />
+                </div>
+                <button type="submit" className="w-full bg-gradient-to-r from-blue-400 to-indigo-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                  Save Changes
+                </button>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 };
 
 export default MealTracker;
+
