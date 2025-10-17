@@ -2,82 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Stethoscope, ShieldCheck, Filter, ExternalLink, Briefcase, MapPin, BadgeIndianRupee, GraduationCap, Clock, Star, StarHalf, StarOff } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
-
-// --- StarRating Component (Included in this file to prevent import errors) ---
-const StarRating = ({ rating }) => {
-  const numericRating = parseFloat(rating) || 0;
-  const fullStars = Math.floor(numericRating);
-  const halfStar = numericRating % 1 >= 0.5;
-  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-
-  if (numericRating <= 0) {
-    return (
-      <div className="flex items-center text-gray-400">
-        <StarOff size={16} className="mr-2" />
-        <span className="text-xs font-medium">No Rating Available</span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-center">
-      {[...Array(fullStars)].map((_, i) => (
-        <Star key={`full-${i}`} size={16} className="text-yellow-400 fill-current" />
-      ))}
-      {halfStar && <StarHalf size={16} className="text-yellow-400 fill-current" />}
-      {[...Array(emptyStars)].map((_, i) => (
-        <Star key={`empty-${i}`} size={16} className="text-gray-300 fill-current" />
-      ))}
-      <span className="ml-2 text-sm font-medium text-black/70">{numericRating.toFixed(1)}</span>
-    </div>
-  );
-};
-
-// --- DoctorCard Component (Included in this file to prevent import errors) ---
-const DoctorCard = ({ doctor, index }) => {
-  // --- FIX: Correctly access and format all complex and varying data fields ---
-  const doctorName = doctor.doctorName || doctor.name || 'N/A';
-  const speciality = doctor.speciality || doctor.specialization || 'Specialist';
-  const clinicName = doctor.clinicName || (doctor.practice && doctor.practice.name) || 'Clinic details not available';
-  const consultationFee = doctor.fees && typeof doctor.fees.amount !== 'undefined' ? doctor.fees.amount : 'N/A';
-  const qualifications = doctor.qualifications && Array.isArray(doctor.qualifications)
-    ? doctor.qualifications.map(q => q.degree).join(', ')
-    : 'N/A';
-  const address = doctor.address || (doctor.practice && doctor.practice.address && doctor.practice.address.locality) || doctor.location || 'Location not specified';
-  const websiteUrl = doctor.website || doctor.profileUrl;
-
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.4, delay: index * 0.05, type: "spring", stiffness: 120 }}
-      className="glass-card p-6 flex flex-col text-left space-y-4 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300"
-    >
-      <div>
-        <h3 className="text-2xl font-bold text-black">{doctorName}</h3>
-        <p className="text-blue-600 font-semibold">{speciality}</p>
-      </div>
-      <div className="text-sm space-y-3 text-black/80">
-        <p className="flex items-start"><Briefcase size={16} className="mr-3 mt-0.5 flex-shrink-0 text-black/50" /><span>{doctor.experience} Years Experience</span></p>
-        <p className="flex items-start"><GraduationCap size={16} className="mr-3 mt-0.5 flex-shrink-0 text-black/50" /><span>{qualifications}</span></p>
-        <p className="flex items-start"><MapPin size={16} className="mr-3 mt-0.5 flex-shrink-0 text-black/50" /><span><strong>{clinicName}</strong>, {address}</span></p>
-        <p className="flex items-center"><BadgeIndianRupee size={16} className="mr-3 flex-shrink-0 text-black/50" /><span>₹{consultationFee} Consultation Fee</span></p>
-        <p className="flex items-center"><Clock size={16} className="mr-3 flex-shrink-0 text-black/50" /><span>{doctor.timings}</span></p>
-      </div>
-      <div className="pt-2">
-        <StarRating rating={doctor.rating} />
-      </div>
-      <div className="flex-grow"></div>
-      {websiteUrl && (
-        <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="btn-primary w-full mt-4 inline-flex items-center justify-center" aria-label={`Visit clinic website for ${doctorName}`}>
-          Visit Clinic <ExternalLink className="h-4 w-4 ml-2" />
-        </a>
-      )}
-    </motion.div>
-  );
-};
+import DoctorCard from '../components/DoctorCard';
+// Note: StarRating is no longer defined here, it's imported in DoctorCard
 
 // --- Main DoctorFinder Component ---
 const DoctorFinder = () => {
@@ -90,11 +16,15 @@ const DoctorFinder = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // This initial fetch uses a local JSON file for mock/initial data.
+    // To use the live backend API, you would replace this with:
+    // const response = await apiService.doctors.find(selectedSpecialty, 'delhi');
     const fetchDoctors = async () => {
       try {
         const response = await fetch('/data/doctors.json');
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
+        // Use specialization or speciality, as per the data schema mapping in DoctorCard
         const uniqueSpecialties = [...new Set(data.map(doc => doc.speciality || doc.specialization).filter(Boolean))];
         const allUniqueServices = [...new Set(data.flatMap(doc => doc.services || []).filter(Boolean))];
         setAllDoctors(data);
@@ -137,7 +67,6 @@ const DoctorFinder = () => {
   }, [selectedSpecialty, selectedService, allDoctors]);
 
   return (
-    // --- FIX: Added responsive padding to prevent overlap on mobile ---
     <div className="min-h-screen px-4 pt-24 sm:px-6 md:px-8">
       <div className="wave"></div>
       <div className="wave"></div>
@@ -147,7 +76,6 @@ const DoctorFinder = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          // --- FIX: Increased bottom margin for more space ---
           className="text-center mb-10 md:mb-12"
         >
           <Filter className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-black/80" />
@@ -159,14 +87,14 @@ const DoctorFinder = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="relative">
               <Stethoscope className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-black/50" />
-              <select value={selectedSpecialty} onChange={(e) => setSelectedSpecialty(e.target.value)} className="input pl-10 w-full" aria-label="Select a specialization">
+              <select value={selectedSpecialty} onChange={(e) => setSelectedSpecialty(e.target.value)} className="input pl-10 w-full" aria-label="Select a specialization" style={{ paddingLeft: '2.5rem' }}>
                 <option value="">Filter by Specialization</option>
                 {specializations.map(spec => <option key={spec} value={spec}>{spec}</option>)}
               </select>
             </div>
             <div className="relative">
               <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-black/50" />
-              <select value={selectedService} onChange={(e) => setSelectedService(e.target.value)} className="input pl-10 w-full" aria-label="Select a service" disabled={!availableServices.length}>
+              <select value={selectedService} onChange={(e) => setSelectedService(e.target.value)} className="input pl-10 w-full" aria-label="Select a service" disabled={!availableServices.length} style={{ paddingLeft: '2.5rem' }}>
                 <option value="">Filter by Service</option>
                 {availableServices.map(serv => <option key={serv} value={serv}>{serv}</option>)}
               </select>
@@ -182,7 +110,8 @@ const DoctorFinder = () => {
               {filteredDoctors.length > 0 ? (
                 <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                   {filteredDoctors.map((doc, index) => (
-                    <DoctorCard key={`${doc.doctorName || doc.name}-${index}`} doctor={doc} index={index} />
+                    // DoctorCard uses the correct props from the updated component logic
+                    <DoctorCard key={`${doc.doctorName || doc.name}-${index}`} doctor={doc} index={index} /> 
                   ))}
                 </motion.div>
               ) : (

@@ -29,6 +29,10 @@ const DoctorCard = ({ doctor, index }) => {
   // Handles both `website` and `profileUrl` for the link.
   const websiteUrl = doctor.website || doctor.profileUrl;
 
+  // Rating calculation compatible with the source repo's `DoctorFinder.jsx` logic
+  const ratingValue = doctor.ratings ? (doctor.ratings.recommendationPercent / 100) * 5 : doctor.rating || 0;
+  const reviewsCount = doctor.ratings ? doctor.ratings.reviewsCount : 0;
+
   return (
     <motion.div
       layout
@@ -38,6 +42,14 @@ const DoctorCard = ({ doctor, index }) => {
       transition={{ duration: 0.4, delay: index * 0.05, type: "spring", stiffness: 120 }}
       className="glass-card p-6 flex flex-col text-left space-y-4 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300"
     >
+      <div className="flex-shrink-0 w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-blue-200 shadow-md">
+        <img
+          className="w-full h-full object-cover object-center"
+          src={doctor.imageUrl || 'https://via.placeholder.com/150'} // Fallback for missing images
+          alt={`Dr. ${doctorName}`}
+          onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/150'; }} // Fallback on error
+        />
+      </div>
       <div>
         <h3 className="text-2xl font-bold text-black">{doctorName}</h3>
         <p className="text-blue-600 font-semibold">{speciality}</p>
@@ -48,11 +60,10 @@ const DoctorCard = ({ doctor, index }) => {
         <p className="flex items-start"><GraduationCap size={16} className="mr-3 mt-0.5 flex-shrink-0 text-black/50" /><span>{qualifications}</span></p>
         <p className="flex items-start"><MapPin size={16} className="mr-3 mt-0.5 flex-shrink-0 text-black/50" /><span><strong>{clinicName}</strong>, {address}</span></p>
         <p className="flex items-center"><BadgeIndianRupee size={16} className="mr-3 flex-shrink-0 text-black/50" /><span>₹{consultationFee} Consultation Fee</span></p>
-        <p className="flex items-center"><Clock size={16} className="mr-3 flex-shrink-0 text-black/50" /><span>{doctor.timings}</span></p>
       </div>
 
       <div className="pt-2">
-        <StarRating rating={doctor.rating} />
+        <StarRating rating={ratingValue} reviewsCount={reviewsCount} />
       </div>
 
       <div className="flex-grow"></div>

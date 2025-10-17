@@ -34,7 +34,7 @@ app.use('/api/records', recordRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/symptoms', symptomRoutes);
 app.use('/api/meals', mealRoutes);
-app.use('/api/chatbot', chatbotRoutes); // Register the chatbot routes
+app.use('/api/chatbot', chatbotRoutes); 
 app.use('/api/medisage', medisageRoutes);
 
 // --- Database Connection ---

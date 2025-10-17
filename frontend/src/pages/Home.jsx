@@ -153,13 +153,6 @@ const features = [
         link: "/meal-tracker",
         color: "from-yellow-100/80 to-yellow-200/80"
     },
-    {
-        icon: <FileText size={32} className="text-primary" />,
-        title: "Medical Records",
-        description: "Securely store and access your health records.",
-        link: "/medical-records",
-        color: "from-red-100/80 to-red-200/80"
-    },
 ];
 
 const FeatureCard = ({ icon, title, description, link, color }) => (

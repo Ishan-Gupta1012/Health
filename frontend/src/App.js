@@ -13,7 +13,6 @@ import About from './pages/About';
 import SignIn from './pages/SignIn';
 import SymptomChecker from './pages/SymptomChecker';
 import DoctorFinder from './pages/DoctorFinder';
-import MedicalRecords from './pages/MedicalRecords';
 import Profile from './pages/Profile';
 import MealTracker from './pages/My/MealTracker'; 
 import MediSagePage from './pages/MediSagePage';
@@ -37,7 +36,6 @@ const AppLayout = () => {
             <Route path="/signin" element={<AuthWrapper><SignIn /></AuthWrapper>} />
             <Route path="/symptom-checker" element={<SymptomChecker />} />
             <Route path="/doctor-finder" element={<DoctorFinder />} />
-            <Route path="/medical-records" element={<ProtectedRoute><MedicalRecords /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/my-meals" element={<ProtectedRoute><MealTracker /></ProtectedRoute>} />
             <Route path="/medisage" element={<MediSagePage />} />
