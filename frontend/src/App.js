@@ -9,14 +9,14 @@ import LoadingSpinner from './components/LoadingSpinner';
 
 // Pages
 import Home from './pages/Home';
-import About from './pages/About'; // Import the new About page
+import About from './pages/About'; 
 import SignIn from './pages/SignIn';
 import SymptomChecker from './pages/SymptomChecker';
 import DoctorFinder from './pages/DoctorFinder';
 import MedicalRecords from './pages/MedicalRecords';
 import Profile from './pages/Profile';
-// FIX: Corrected the path from './pages/MyMeals/MealTracker' to './pages/My/MealTracker'
 import MealTracker from './pages/My/MealTracker'; 
+import MediSagePage from './pages/MediSagePage';
 
 // Hooks
 import { useAuth } from './hooks/useAuth';
@@ -24,7 +24,6 @@ import { useAuth } from './hooks/useAuth';
 // Layout component to handle conditional footer
 const AppLayout = () => {
   const location = useLocation();
-  // Show footer on home ('/') and about ('/about') pages
   const showFooter = location.pathname === '/' || location.pathname === '/about';
 
   return (
@@ -41,10 +40,10 @@ const AppLayout = () => {
             <Route path="/medical-records" element={<ProtectedRoute><MedicalRecords /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/my-meals" element={<ProtectedRoute><MealTracker /></ProtectedRoute>} />
+            <Route path="/medisage" element={<MediSagePage />} />
           </Routes>
         </AnimatePresence>
       </main>
-      {/* Conditionally render the Footer */}
       {showFooter && <Footer />}
     </>
   );

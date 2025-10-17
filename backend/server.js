@@ -12,7 +12,8 @@ const recordRoutes = require('./routes/records');
 const doctorRoutes = require('./routes/doctors');
 const symptomRoutes = require('./routes/symptoms');
 const mealRoutes = require('./routes/meals');
-const chatbotRoutes = require('./routes/chatbot'); // Import the new chatbot routes
+const chatbotRoutes = require('./routes/chatbot'); 
+const medisageRoutes = require('./routes/medisageRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 8001;
@@ -34,6 +35,7 @@ app.use('/api/doctors', doctorRoutes);
 app.use('/api/symptoms', symptomRoutes);
 app.use('/api/meals', mealRoutes);
 app.use('/api/chatbot', chatbotRoutes); // Register the chatbot routes
+app.use('/api/medisage', medisageRoutes);
 
 // --- Database Connection ---
 mongoose.connect(process.env.MONGODB_URI)

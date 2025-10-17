@@ -220,7 +220,37 @@ export const chatbot = {
     }
 };
 
-// 🧩 Centralized API service
-export const apiService = { auth, reminders, records, meals, doctors, chatbot };
+// 🩺 Symptom Checker API methods (NEW SECTION)
+export const symptomChecker = {
+    parseSymptoms: async (text, age, sex) => {
+        try {
+            const response = await api.post('/symptoms/parse', { text, age, sex });
+            return response.data;
+        } catch (err) {
+            throw new Error(getErrorMessage(err));
+        }
+    },
+    getDiagnosis: async (diagnosisRequest) => {
+        try {
+            const response = await api.post('/symptoms/diagnose', diagnosisRequest);
+            return response.data;
+        } catch (err) {
+            throw new Error(getErrorMessage(err));
+        }
+    },
+    getHealthAdvice: async (diseaseName) => {
+        try {
+            // Note: Calling the new backend route, not the external Gemini API directly
+            const response = await api.post('/symptoms/advice', { diseaseName });
+            return response.data.advice; 
+        } catch (err) {
+            throw new Error(getErrorMessage(err));
+        }
+    }
+};
+
+// 🧩 Centralized API service (MODIFIED)
+export const apiService = { auth, reminders, records, meals, doctors, chatbot, symptomChecker }; 
+// Make sure symptomChecker is added here
 
 export default apiService;

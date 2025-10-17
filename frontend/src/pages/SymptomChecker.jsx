@@ -1,136 +1,125 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Stethoscope, LogIn } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { api } from '../utils/api';
-import { getAuthHeaders, getErrorMessage } from '../utils/api'; // Import helpers
+import React, { useState, useCallback } from 'react';
+import SymptomForm from '../components/symptom/SymptomForm';
+import ResultsDisplay from '../components/symptom/ResultsDisplay';
+import LoadingSpinner from '../components/LoadingSpinner';
+import apiService from '../utils/api';
+// Assuming a simple ErrorMessage component or using a simple div
+const ErrorMessage = ({ message }) => (
+    <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg mt-4" role="alert">
+        <p className="font-bold">Error</p>
+        <p className="text-sm">{message}</p>
+    </div>
+);
+
+const WaveBackground = () => (
+  <div className="absolute top-0 left-0 w-full h-full -z-10 overflow-hidden">
+    <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-blue-200 to-transparent"></div>
+    <div 
+      className="absolute top-0 -left-1/4 w-[150%] h-[150%] opacity-50"
+      style={{
+        background: 'radial-gradient(circle at 20% 20%, rgba(147, 197, 253, 0.4) 0%, rgba(147, 197, 253, 0) 40%)'
+      }}
+    ></div>
+    <div 
+      className="absolute bottom-0 -right-1/4 w-[150%] h-[150%] opacity-50"
+      style={{
+        background: 'radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0) 40%)'
+      }}
+    ></div>
+  </div>
+);
+
 
 const SymptomChecker = () => {
-    const { user } = useAuth();
-    const [availableSymptoms, setAvailableSymptoms] = useState([]);
-    const [selectedSymptom, setSelectedSymptom] = useState('');
-    const [results, setResults] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
+  const [symptoms, setSymptoms] = useState('');
+  const [age, setAge] = useState(''); // Use empty string for initial state for the input field
+  const [sex, setSex] = useState('male');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [conditions, setConditions] = useState(null);
 
-    useEffect(() => {
-        if (user) {
-            const fetchSymptoms = async () => {
-                try {
-                    const response = await api.get('/symptoms/available', {
-                        headers: getAuthHeaders()
-                    });
-                    setAvailableSymptoms(response.data.symptoms);
-                } catch (err) {
-                    setError(getErrorMessage(err));
-                    console.error('Fetch symptoms error:', err);
-                }
-            };
-            fetchSymptoms();
-        }
-    }, [user]);
+  const handleCheckSymptoms = useCallback(async (e) => {
+    e.preventDefault();
+    const numericAge = parseInt(age);
+    if (!symptoms || age === '' || isNaN(numericAge) || numericAge < 1 || numericAge > 120) return;
 
-    const handleCheckSymptoms = async () => {
-        if (!selectedSymptom) {
-            setError('Please select a symptom or condition.');
-            return;
-        }
-        setIsLoading(true);
-        setError('');
-        setResults(null);
-        try {
-            const response = await api.post('/symptoms/check', 
-                { symptoms: [selectedSymptom] },
-                { headers: getAuthHeaders() }
-            );
-            setResults(response.data);
-        } catch (err) {
-            setError(getErrorMessage(err));
-            console.error('Check symptoms error:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    setIsLoading(true);
+    setError(null);
+    setConditions(null);
 
-    if (!user) {
-        return (
-            <div className="min-h-screen flex items-center justify-center p-4">
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="glass-card p-8 text-center"
-                >
-                    <LogIn className="mx-auto h-12 w-12 text-black" />
-                    <h1 className="text-2xl font-bold text-black mt-4">Login Required</h1>
-                    <p className="text-black/80 my-4">You must be logged in to use the Symptom Checker.</p>
-                    <Link to="/signin" className="btn-primary">
-                        Go to Sign In
-                    </Link>
-                </motion.div>
-            </div>
-        );
+    try {
+      // Step 1: Parse symptoms from text (calls backend /api/symptoms/parse)
+      const parsedData = await apiService.symptomChecker.parseSymptoms(symptoms, numericAge, sex);
+      
+      if (parsedData.mentions.length === 0) {
+        throw new Error("We couldn't understand the symptoms. Please try rephrasing them.");
+      }
+
+      // Step 2: Format evidence for diagnosis
+      const evidence = parsedData.mentions.map((mention) => ({
+        id: mention.id,
+        choice_id: 'present',
+        source: 'initial',
+      }));
+
+      // Step 3: Get diagnosis (calls backend /api/symptoms/diagnose)
+      const diagnosisData = await apiService.symptomChecker.getDiagnosis({
+        sex,
+        age: { value: numericAge },
+        evidence,
+      });
+
+      // Show top 3 conditions
+      setConditions(diagnosisData.conditions.slice(0, 3));
+    } catch (err) {
+      // Use the error message from the API service
+      setError(err.message || 'An unknown error occurred. Please try again.');
+      setConditions([]); 
+    } finally {
+      setIsLoading(false);
     }
+  }, [symptoms, age, sex]);
 
-    return (
-        <div className="min-h-screen p-4 sm:p-6 md:p-8">
-            <div className="wave"></div>
-            <div className="wave"></div>
-            <div className="wave"></div>
-            <div className="max-w-4xl mx-auto">
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="glass-card p-8"
-                >
-                    <div className="text-center mb-8">
-                        <Stethoscope className="mx-auto h-12 w-12 text-black" />
-                        <h1 className="text-3xl font-bold text-black mt-4">Symptom Checker</h1>
-                        <p className="text-black/80">Select a primary symptom or condition to get started.</p>
-                    </div>
+  return (
+    <>
+      {/* Injecting style for animation from source App.tsx, which is needed by DiseaseCard.jsx */}
+      <style>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.5s ease-out forwards;
+        }
+      `}</style>
+      <WaveBackground />
+      <div className="flex justify-center items-center py-12 md:py-20 px-4 w-full min-h-[calc(100vh-80px)]">
+        <div className="w-full max-w-2xl bg-white/30 backdrop-blur-xl border border-white/40 rounded-2xl shadow-2xl p-6 md:p-10 transition-all duration-500">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Symptom Checker</h1>
+            <p className="mt-2 text-slate-600">Enter your symptoms to get insights into possible conditions.</p>
+            <p className="mt-1 text-xs text-slate-500">Disclaimer: This tool is for informational purposes only and not a substitute for professional medical advice.</p>
+          </div>
+          
+          <SymptomForm
+            symptoms={symptoms}
+            setSymptoms={setSymptoms}
+            age={age}
+            setAge={setAge}
+            sex={sex}
+            setSex={setSex}
+            onSubmit={handleCheckSymptoms}
+            isLoading={isLoading}
+          />
 
-                    <div className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-black mb-2">Search for a Symptom or Condition</label>
-                            <div className="flex gap-2">
-                                <select 
-                                    className="input appearance-none w-full"
-                                    value={selectedSymptom}
-                                    onChange={(e) => setSelectedSymptom(e.target.value)}
-                                >
-                                    <option value="">-- Select from {availableSymptoms.length} options --</option>
-                                    {availableSymptoms.map((symptom) => (
-                                        <option key={symptom.value} value={symptom.value}>
-                                            {symptom.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                <button onClick={handleCheckSymptoms} className="btn-primary whitespace-nowrap" disabled={isLoading}>
-                                    {isLoading ? 'Checking...' : 'Check'}
-                                </button>
-                            </div>
-                        </div>
-
-                        {error && <p className="text-red-500 text-center">{error}</p>}
-
-                        {results && (
-                            <div className="bg-blue-100/50 p-4 rounded-lg text-black animate-fade-in">
-                                <h4 className="font-semibold text-lg mb-2">Results</h4>
-                                {results.results.map((result, index) => (
-                                    <div key={index} className="mb-3">
-                                        <p className="font-bold">{result.symptom}</p>
-                                        <p className="text-sm"><span className="font-semibold">Recommendation:</span> {result.recommendations.join(', ')}</p>
-                                    </div>
-                                ))}
-                                <p className="text-xs mt-4 italic">{results.disclaimer}</p>
-                            </div>
-                        )}
-                    </div>
-                </motion.div>
-            </div>
+          {isLoading && <LoadingSpinner />}
+          {error && !isLoading && <ErrorMessage message={error} />}
+          
+          {conditions && !isLoading && <ResultsDisplay conditions={conditions} />}
         </div>
-    );
+      </div>
+    </>
+  );
 };
 
 export default SymptomChecker;

@@ -12,7 +12,8 @@ import {
   Calendar,
   FileText,
   ClipboardList,
-  ChevronDown
+  ChevronDown,
+  Brain,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
@@ -45,6 +46,7 @@ const Header = () => {
     { name: 'Find Doctors', path: '/doctor-finder', icon: Search },
     { name: 'Medical Records', path: '/medical-records', icon: FileText, requiresAuth: true },
     { name: 'My Meals', path: '/my-meals', icon: ClipboardList, requiresAuth: true },
+    { name: 'MediSage AI', path: '/medisage', icon: FileText },
   ];
 
   const isActive = (path) => location.pathname === path;
