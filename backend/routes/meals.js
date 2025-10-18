@@ -1,13 +1,12 @@
 const express = require('express');
 const Meal = require('../models/Meal');
 const { verifyToken } = require('./authMiddleware');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenAI } = require("@google/genai");
 const router = express.Router();
 
 // --- Initialize Gemini AI ---
-const genAI = process.env.GEMINI_API_KEY
-  ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-  : null;
+const API_KEY = process.env.GEMINI_API_KEY;
+const genAI = API_KEY ? new GoogleGenAI({ apiKey: API_KEY }) : null;
 
 // --- Helper Function to get nutritional data ---
 const getNutritionalData = async (foodItem, quantity) => {
@@ -19,12 +18,14 @@ const getNutritionalData = async (foodItem, quantity) => {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
     const prompt = `Provide a JSON object with nutritional estimates for "${quantity} of ${foodItem}". The JSON object should have four keys: "calories", "protein", "fat", and "carbohydrates". The values should be numbers only. Example: {"calories": 300, "protein": 20, "fat": 15, "carbohydrates": 25}`;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text().trim();
+    const response = await genAI.models.generateContent({
+      model: 'gemini-2.5-pro',
+      contents: prompt,
+    });
+    
+    const text = response.text.trim();
     
     // Clean the response to ensure it's valid JSON
     const jsonString = text.replace(/```json/g, '').replace(/```/g, '');
@@ -148,7 +149,7 @@ router.get('/today', verifyToken, async (req, res) => {
       createdAt: { $gte: today, $lt: tomorrow }
     }).sort({ createdAt: 'asc' });
 
-    res.json(meals); // Changed from { meals } to just meals for consistency with the new route
+    res.json(meals);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch today\'s meals', error: error.message });
   }
@@ -166,7 +167,7 @@ router.get('/history', verifyToken, async (req, res) => {
             createdAt: { $gte: sevenDaysAgo }
         }).sort({ createdAt: 'desc' });
 
-        res.json(meals); // Changed from { meals } to just meals for consistency with the new route
+        res.json(meals);
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch meal history', error: error.message });
     }
@@ -196,7 +197,6 @@ router.get('/advice', verifyToken, async (req, res) => {
         const totalCalories = meals.reduce((sum, meal) => sum + meal.calories, 0);
         const mealSummary = meals.map(m => `${m.mealType}: ${m.quantity} of ${m.foodItem} (~${m.calories} kcal)`).join('\n');
 
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
         const prompt = `You are a professional AI nutrition and wellness assistant. The user has logged their meals for the day.
 
 ### TASK:
@@ -208,16 +208,18 @@ Analyze the user's full-day meal data and generate a health summary in two short
 
 2️⃣ In the **second paragraph**, provide personalized **nutrition advice**, including:
 - Which nutrients (protein, fiber, vitamins, carbs, fats) the user should increase or decrease
-- What kind of foods would help improve balance (e.g., “add more leafy vegetables”, “reduce fried foods”, “include fruits with low glycemic index”)
+- What kind of foods would help improve balance (e.g., "add more leafy vegetables", "reduce fried foods", "include fruits with low glycemic index")
 
 ### OUTPUT FORMAT:
 Keep the tone friendly and professional.
 Output should be exactly two paragraphs — no bullet points, no numbering.
  Total calories consumed were ${totalCalories}.\n\nMeals:\n${mealSummary}\n\nAdvice:`;
 
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const advice = response.text().trim();
+        const response = await genAI.models.generateContent({
+          model: 'gemini-2.5-pro',
+          contents: prompt,
+        });
+        const advice = response.text.trim();
 
         res.json({ advice });
     } catch (error) {

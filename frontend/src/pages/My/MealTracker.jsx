@@ -19,11 +19,16 @@ const MealTracker = () => {
     setLoading(true);
     setError('');
     try {
-      const mealData = view === 'today'
-        ? await apiService.meals.getTodaysMeals()
-        : await apiService.meals.getMealHistory();
+      let mealData;
+      if (view === 'today') {
+        mealData = await apiService.meals.getTodaysMeals();
+      } else {
+        mealData = await apiService.meals.getMealHistory();
+      }
       
-      setMeals(mealData?.meals || []); 
+      // Handle both array and object responses
+      const mealsArray = Array.isArray(mealData) ? mealData : (mealData?.meals || []);
+      setMeals(mealsArray);
 
       if (view === 'today') {
         const adviceData = await apiService.meals.getAIAdvice();
@@ -58,8 +63,8 @@ const MealTracker = () => {
       setNewMeal({ mealType: 'Breakfast', foodItem: '', quantity: '', time: '' });
       fetchData(); // Refresh list
     } catch (err) {
-      setError('Failed to add meal.');
-      console.error(err);
+      setError('Failed to add meal. Please check your API connection.');
+      console.error('Add meal error:', err);
     }
   };
 
@@ -257,7 +262,7 @@ const MealTracker = () => {
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-black/80 mb-1">Meal Type</label>
-                    <select name="mealType" value={editingMeal.mealType} onChange={(e) => setEditingMeal({...editingMeal, mealType: e.g.target.value})} className="input">
+                    <select name="mealType" value={editingMeal.mealType} onChange={(e) => setEditingMeal({...editingMeal, mealType: e.target.value})} className="input">
                       <option>Breakfast</option>
                       <option>Lunch</option>
                       <option>Dinner</option>
@@ -290,4 +295,3 @@ const MealTracker = () => {
 };
 
 export default MealTracker;
-
