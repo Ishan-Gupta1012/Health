@@ -51,19 +51,30 @@ export const AuthProvider = ({ children }) => {
           const token = localStorage.getItem('healthnest_token');
           if (token) {
             const cachedUser = JSON.parse(localStorage.getItem('healthnest_user'));
-            setUser(cachedUser);
+            setUser(cachedUser); // Set cached user first for speed
 
+            // Fetch profile to get latest user data (including role)
             const response = await apiService.auth.getProfile();
-            setUser(response.data.user);
+            const freshUser = response.data.user;
+            setUser(freshUser);
+            
+            // UPDATED: Store fresh user data and role
+            localStorage.setItem('healthnest_user', JSON.stringify(freshUser));
+            localStorage.setItem('healthnest_role', freshUser.role);
           }
         } catch (error) {
           console.error("Profile fetch error:", error.message);
           await signOut(auth);
           localStorage.removeItem('healthnest_token');
           localStorage.removeItem('healthnest_user');
+          localStorage.removeItem('healthnest_role'); // UPDATED: Clear role
           setUser(null);
         }
       } else {
+        // No Firebase user, clear everything
+        localStorage.removeItem('healthnest_token');
+        localStorage.removeItem('healthnest_user');
+        localStorage.removeItem('healthnest_role'); // UPDATED: Clear role
         setUser(null);
       }
       setLoading(false);
@@ -79,10 +90,11 @@ export const AuthProvider = ({ children }) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       const response = await apiService.auth.login({ email, password });
-      const { token, user: backendUser } = response.data;
+      const { token, user: backendUser } = response.data; // backendUser now includes 'role'
 
       localStorage.setItem('healthnest_token', token);
       localStorage.setItem('healthnest_user', JSON.stringify(backendUser));
+      localStorage.setItem('healthnest_role', backendUser.role); // UPDATED: Store role
       setUser(backendUser);
 
       return { success: true };
@@ -93,15 +105,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (name, email, password) => {
+  // UPDATED: Added 'role' parameter
+  const register = async (name, email, password, role) => {
     try {
-      const response = await apiService.auth.register({ name, email, password });
-      const { token, user: backendUser } = response.data;
+      // UPDATED: Pass 'role' to backend registration
+      const response = await apiService.auth.register({ name, email, password, role });
+      const { token, user: backendUser } = response.data; // backendUser now includes 'role'
 
+      // Create Firebase user *after* backend confirms registration
       await createUserWithEmailAndPassword(auth, email, password);
 
       localStorage.setItem('healthnest_token', token);
       localStorage.setItem('healthnest_user', JSON.stringify(backendUser));
+      localStorage.setItem('healthnest_role', backendUser.role); // UPDATED: Store role
       setUser(backendUser);
 
       return { success: true };
@@ -118,22 +134,25 @@ export const AuthProvider = ({ children }) => {
       .then(async (result) => {
         const firebaseUser = result.user;
 
-        // Google OAuth backend call (no more googleSync)
+        // This logic seems incorrect, Google sign-in should go to a dedicated backend route
+        // But following your *original* file's logic:
         const tokenResponse = await apiService.auth.login({
           email: firebaseUser.email,
-          password: firebaseUser.uid, // Use UID as temporary password if backend allows
+          password: firebaseUser.uid, 
         }).catch(() => {
-          // Optional: If user doesn't exist in backend, auto-register
+          // Auto-register as 'patient' if login fails
           return apiService.auth.register({
             name: firebaseUser.displayName,
             email: firebaseUser.email,
-            password: firebaseUser.uid
+            password: firebaseUser.uid,
+            role: 'patient' // Google signups default to patient
           });
         });
 
         const { token, user: backendUser } = tokenResponse.data;
         localStorage.setItem('healthnest_token', token);
         localStorage.setItem('healthnest_user', JSON.stringify(backendUser));
+        localStorage.setItem('healthnest_role', backendUser.role); // UPDATED: Store role
         setUser(backendUser);
 
         return { success: true };
@@ -148,10 +167,11 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (updates) => {
     try {
       const response = await apiService.auth.updateProfile(updates);
-      const { user: updatedUser } = response.data;
+      const { user: updatedUser } = response.data; // updatedUser may have new info
 
       // Update local storage and state
       localStorage.setItem('healthnest_user', JSON.stringify(updatedUser));
+      localStorage.setItem('healthnest_role', updatedUser.role); // UPDATED: Re-store role
       setUser(updatedUser);
 
       return { success: true, user: updatedUser };
@@ -167,6 +187,7 @@ export const AuthProvider = ({ children }) => {
       await signOut(auth);
       localStorage.removeItem('healthnest_token');
       localStorage.removeItem('healthnest_user');
+      localStorage.removeItem('healthnest_role'); // UPDATED: Clear role
       setUser(null);
     } catch (error) {
       console.error("Logout Error:", error?.message);

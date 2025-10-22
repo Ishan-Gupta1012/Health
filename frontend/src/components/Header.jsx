@@ -9,11 +9,11 @@ import {
   LogOut,
   Stethoscope,
   Search,
-  Calendar,
   FileText,
   ClipboardList,
   ChevronDown,
   Brain,
+  ShoppingCart, // Added icon for assistant
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
@@ -44,9 +44,9 @@ const Header = () => {
   const servicesItems = [
     { name: 'Symptom Checker', path: '/symptom-checker', icon: Stethoscope },
     { name: 'Find Doctors', path: '/doctor-finder', icon: Search },
-    { name: 'MediSage', path: '/medisage', icon: FileText },
+    { name: 'MediSage AI', path: '/medisage', icon: Brain }, // Changed Icon
     { name: 'My Meals', path: '/my-meals', icon: ClipboardList, requiresAuth: true },
-    
+    { name: 'Prescription Assistant', path: '/prescription-assistant', icon: ShoppingCart, requiresAuth: true }, // Added Assistant
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -93,12 +93,11 @@ const Header = () => {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    /* --- THIS IS THE CORRECTED STYLE --- */
-                    /* A strong blur (backdrop-blur-xl) is applied ONLY to this dropdown div. */
-                    /* The background is semi-transparent (bg-white/60) to enhance readability. */
-                    className="absolute left-0 mt-2 w-56 bg-white/100 backdrop-blur-xl rounded-xl shadow-2xl border border-white/30 py-2"
+                    // Use glass-card style for dropdown
+                    className="absolute left-0 mt-2 w-56 glass-card p-2 shadow-2xl"
                    >
                      {servicesItems.map((item) => (
+                       // Ensure link requires auth if specified
                        <Link
                          key={item.name}
                          to={item.requiresAuth && !user ? "/signin" : item.path}
@@ -133,8 +132,8 @@ const Header = () => {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    /* --- THIS IS ALSO CORRECTED FOR CONSISTENCY --- */
-                    className="absolute right-0 mt-2 w-48 bg-white/60 backdrop-blur-xl rounded-xl shadow-2xl border border-white/30 py-2"
+                    // Use glass-card style for dropdown
+                    className="absolute right-0 mt-2 w-48 glass-card p-2 shadow-2xl"
                   >
                     <Link
                       to="/profile"

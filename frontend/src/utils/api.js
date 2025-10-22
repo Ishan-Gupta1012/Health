@@ -1,29 +1,29 @@
 import axios from 'axios';
 
-// 🌐 Base backend URL
-const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+// 🌐 Base backend URL (Using your definition)
+const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001'; // Make sure this port matches your backend if it's not 5001
 
-// 🚀 Axios instance
+// 🚀 Axios instance (Using your definition)
 export const api = axios.create({
-  baseURL: `${BASE_URL}/api`,
+  baseURL: `${BASE_URL}/api`, // Ensure '/api' prefix is correct for your backend routes
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: true
+  withCredentials: true // Keeping your setting
 });
 
-// 🔐 Auth header helper
+// 🔐 Auth header helper (Your existing helper)
 export const getAuthHeaders = () => {
-  const token = localStorage.getItem('healthnest_token');
+  const token = localStorage.getItem('healthnest_token'); // Matches your useAuth.js
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-// ⚠️ Error message parser
+// ⚠️ Error message parser (Your existing helper)
 export const getErrorMessage = (error) => {
   return error?.response?.data?.message || error?.message || 'Something went wrong';
 };
 
 // --- API Service Definitions ---
 
-// 🔧 Auth API methods
+// 🔧 Auth API methods (Your existing methods)
 export const auth = {
   login: async (data) => {
     try {
@@ -55,14 +55,17 @@ export const auth = {
   },
   logout: async () => {
     try {
+      // Assuming your backend has a logout route, adjust if necessary
       return await api.post('/auth/logout', {}, { headers: getAuthHeaders() });
     } catch (err) {
-      throw new Error(getErrorMessage(err));
+      // Don't throw error on logout fail, just proceed client-side
+      console.error("Logout API call failed:", getErrorMessage(err));
+      return null; // Indicate potential failure but don't block client logout
     }
   }
 };
 
-// 💊 Reminders API methods
+// 💊 Reminders API methods (Your existing methods)
 export const reminders = {
   createReminder: async (data) => {
     try {
@@ -90,7 +93,7 @@ export const reminders = {
   }
 };
 
-// 🩺 Medical Records API methods
+// 🩺 Medical Records API methods (Your existing methods)
 export const records = {
   createRecord: async (formData) => {
     try {
@@ -123,7 +126,7 @@ export const records = {
   }
 };
 
-// 🍽️ Meals API methods
+// 🍽️ Meals API methods (Your existing methods)
 export const meals = {
     addMeal: async (mealData) => {
         try {
@@ -173,25 +176,24 @@ export const meals = {
             throw new Error(getErrorMessage(err));
         }
     },
-    // NEW FUNCTION: Fetch meals for a specific date
     getMealsByDate: async (date) => {
         try {
-            // Call the new backend endpoint
+            // Adjust endpoint if needed based on your backend route definition
             const response = await api.get(`/meals/user?date=${date}`, { headers: getAuthHeaders() });
-            // The backend returns the array of meals directly
-            return response.data; 
+            return response.data;
         } catch (err) {
             throw new Error(getErrorMessage(err));
         }
     }
 };
 
-// 👨‍⚕️ Doctors API methods
+// 👨‍⚕️ Doctors API methods (Your existing methods)
 export const doctors = {
   find: async (specialty, location) => {
     try {
       const encodedSpecialty = encodeURIComponent(specialty);
       const encodedLocation = encodeURIComponent(location);
+      // Ensure this endpoint '/doctors' matches your backend route
       const response = await api.get(`/doctors?specialty=${encodedSpecialty}&location=${encodedLocation}`);
       return response.data;
     } catch (err) {
@@ -200,7 +202,7 @@ export const doctors = {
   }
 };
 
-// 🤖 Chatbot API methods
+// 🤖 Chatbot API methods (Your existing methods)
 export const chatbot = {
     getGeminiReply: async (data) => {
         try {
@@ -220,7 +222,7 @@ export const chatbot = {
     }
 };
 
-// 🩺 Symptom Checker API methods (NEW SECTION)
+// 🩺 Symptom Checker API methods (Your existing methods)
 export const symptomChecker = {
     parseSymptoms: async (text, age, sex) => {
         try {
@@ -240,17 +242,38 @@ export const symptomChecker = {
     },
     getHealthAdvice: async (diseaseName) => {
         try {
-            // Note: Calling the new backend route, not the external Gemini API directly
             const response = await api.post('/symptoms/advice', { diseaseName });
-            return response.data.advice; 
+            return response.data.advice;
         } catch (err) {
             throw new Error(getErrorMessage(err));
         }
     }
 };
 
-// 🧩 Centralized API service (MODIFIED)
-export const apiService = { auth, reminders, records, meals, doctors, chatbot, symptomChecker }; 
-// Make sure symptomChecker is added here
+// === ADDED: Prescription API methods ===
+export const prescription = {
+  analyzePrescription: async (formData) => {
+    try {
+      // Ensure the endpoint '/prescription/analyze' matches your backend route
+      const response = await api.post('/prescription/analyze', formData, {
+        headers: {
+          ...getAuthHeaders(), // Include auth token
+          'Content-Type': 'multipart/form-data', // Correct header for file uploads
+        }
+      });
+      return response.data; // Return the full response data
+    } catch (err) {
+      throw new Error(getErrorMessage(err));
+    }
+  },
+  // Add other prescription methods here if needed later (e.g., doctor creating one)
+  // createPrescription: async (data) => { ... }
+};
+// === END ADDED SECTION ===
 
-export default apiService;
+
+// 🧩 Centralized API service (MODIFIED)
+// Added 'prescription' to the exported object
+export const apiService = { auth, reminders, records, meals, doctors, chatbot, symptomChecker, prescription };
+
+export default apiService; // Your existing default export

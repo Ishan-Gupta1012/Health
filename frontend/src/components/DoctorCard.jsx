@@ -75,7 +75,7 @@ const DoctorCard = ({ doctor, index }) => {
             className="btn-primary w-full mt-4 inline-flex items-center justify-center"
             aria-label={`Visit clinic website for ${doctorName}`}
           >
-            Visit Clinic <ExternalLink className="h-4 w-4 ml-2" />
+            More Details <ExternalLink className="h-4 w-4 ml-2" />
           </a>
       )}
     </motion.div>

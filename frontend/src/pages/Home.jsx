@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Stethoscope, HeartPulse, Calendar, FileText, Utensils, ArrowRight, Lightbulb } from 'lucide-react';
+import { Stethoscope, HeartPulse, Utensils, ArrowRight, Lightbulb } from 'lucide-react';
 import HealthMateChatbot from '../components/HealthMateChatbot';
 import * as THREE from 'three';
-import { gsap } from 'gsap';
+import { useAuth } from '../hooks/useAuth'; // Import useAuth
 
-// --- New Three.js Animated Background (Updated with continuous background color change) ---
+// --- Three.js Animated Background (Unchanged) ---
 const AnimatedBackground = () => {
     const mountRef = useRef(null);
 
@@ -112,12 +112,11 @@ const AnimatedBackground = () => {
         };
     }, []);
 
-    // Tailwind background class is removed as Three.js now controls the color
     return <div ref={mountRef} className="absolute top-0 left-0 w-full h-full -z-10" />;
 };
 
 
-// --- Predefined list of daily wellness tips ---
+// --- Predefined list of daily wellness tips (Unchanged) ---
 const wellnessTips = [
     "🧘‍♀️ Try stretching for 10 minutes after breakfast to improve digestion.",
     "🍎 Include one fruit before lunch for better vitamin absorption.",
@@ -131,6 +130,7 @@ const wellnessTips = [
     "🔔 Set a reminder to stand up every hour for better posture and circulation."
 ];
 
+// --- Feature cards (Unchanged) ---
 const features = [
     {
         icon: <Stethoscope size={32} className="text-primary" />,
@@ -150,7 +150,7 @@ const features = [
         icon: <Utensils size={32} className="text-primary" />,
         title: "Meal Tracker",
         description: "Log your meals and track your nutrition.",
-        link: "/meal-tracker",
+        link: "/my-meals", // Changed to match App.js
         color: "from-yellow-100/80 to-yellow-200/80"
     },
 ];
@@ -173,27 +173,57 @@ const FeatureCard = ({ icon, title, description, link, color }) => (
 
 const Home = () => {
     const [dailyTip, setDailyTip] = useState('');
+    const { user } = useAuth(); // Get user from auth context
+    const navigate = useNavigate();
 
+    // --- UPDATED: Role-based redirect logic ---
     useEffect(() => {
-        const updateTip = () => {
+        if (user) {
+            // Read role directly from the user object in the auth context
+            const role = user.role; 
+            if (role === 'doctor') {
+                navigate('/doctor-dashboard');
+            } else if (role === 'patient') {
+                navigate('/patient-dashboard');
+            }
+        }
+    }, [user, navigate]);
+
+    // --- Tip logic (Unchanged) ---
+    useEffect(() => {
+        // Only run this if the user is not logged in
+        if (!user) {
+            const updateTip = () => {
+                const now = new Date();
+                const start = new Date(now.getFullYear(), 0, 0);
+                const diff = now - start;
+                const oneDay = 1000 * 60 * 60 * 24;
+                const dayOfYear = Math.floor(diff / oneDay);
+                const tipIndex = dayOfYear % wellnessTips.length;
+                setDailyTip(wellnessTips[tipIndex]);
+            };
+
+            updateTip();
             const now = new Date();
-            const start = new Date(now.getFullYear(), 0, 0);
-            const diff = now - start;
-            const oneDay = 1000 * 60 * 60 * 24;
-            const dayOfYear = Math.floor(diff / oneDay);
-            const tipIndex = dayOfYear % wellnessTips.length;
-            setDailyTip(wellnessTips[tipIndex]);
-        };
+            const midnight = new Date(now);
+            midnight.setHours(24, 0, 0, 0);
+            const msUntilMidnight = midnight.getTime() - now.getTime();
+            const timerId = setTimeout(updateTip, msUntilMidnight);
+            return () => clearTimeout(timerId);
+        }
+    }, [user]); // Re-run if user logs in or out
 
-        updateTip();
-        const now = new Date();
-        const midnight = new Date(now);
-        midnight.setHours(24, 0, 0, 0);
-        const msUntilMidnight = midnight.getTime() - now.getTime();
-        const timerId = setTimeout(updateTip, msUntilMidnight);
-        return () => clearTimeout(timerId);
-    }, []);
+    // --- If user is logged in, show nothing while redirecting ---
+    if (user) {
+        return (
+          <div className="relative min-h-screen text-neutral-800 overflow-hidden">
+            <AnimatedBackground />
+            {/* Page is blank while redirecting */}
+          </div>
+        );
+    }
 
+    // --- Unauthenticated User: Show Landing Page (Unchanged UI) ---
     return (
         <div className="relative min-h-screen text-neutral-800 overflow-hidden">
             <AnimatedBackground />
@@ -214,7 +244,7 @@ const Home = () => {
                         Track, manage, and improve your well-being with our integrated suite of health tools.
                     </p>
                     <div className="mt-8 flex justify-center gap-4">
-                        <Link to="/symptom-checker" className="px-6 py-3 bg-primary text-white font-semibold rounded-full shadow-lg hover:bg-primary-dark transition-colors">
+                        <Link to="/signin" className="px-6 py-3 bg-primary text-white font-semibold rounded-full shadow-lg hover:bg-primary-dark transition-colors">
                             Get Started
                         </Link>
                         <Link to="/about" className="px-6 py-3 bg-white/70 backdrop-blur-sm text-neutral-800 font-semibold rounded-full hover:bg-white transition-colors border border-white/50">
@@ -266,5 +296,3 @@ const Home = () => {
 };
 
 export default Home;
-
-    

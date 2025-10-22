@@ -27,6 +27,12 @@ const userSchema = new mongoose.Schema({
     unique: true,
     sparse: true
   },
+  // ADDED: User role
+  role: {
+    type: String,
+    enum: ['patient', 'doctor'],
+    default: 'patient'
+  },
   avatar: {
     type: String,
     default: ''

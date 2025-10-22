@@ -55,9 +55,10 @@ body {
   @apply bg-white/20 backdrop-blur-lg rounded-2xl shadow-lg border border-white/30;
 }
 
-/* Input Style is PRESERVED */
+/* --- UPDATED: Input Style --- */
+/* 'px-4' (horizontal padding) has been removed to allow component-specific padding */
 .input {
-  @apply w-full px-4 py-2 bg-white/30 text-black placeholder-black/60 border border-white/50 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all;
+  @apply w-full py-2 bg-white/30 text-black placeholder-black/60 border border-white/50 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all;
 }
 
 /* --- STYLES UPDATED WITH DARKER COLORS --- */

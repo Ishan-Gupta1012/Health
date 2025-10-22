@@ -28,11 +28,13 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         return done(null, user);
       }
 
+      // New Google signups default to 'patient' via the schema
       user = new User({
         googleId: profile.id,
         email: profile.emails[0].value,
         name: profile.displayName,
         avatar: profile.photos[0]?.value || ''
+        // role defaults to 'patient'
       });
 
       await user.save();
@@ -67,8 +69,8 @@ const generateToken = (userId) => {
 // Register
 router.post('/register', async (req, res) => {
   try {
-    // UPDATED: Include new profile fields
-    const { email, password, name, phone, dateOfBirth, gender, heightFt, heightIn, weightKg } = req.body;
+    // UPDATED: Include new profile fields and role
+    const { email, password, name, phone, dateOfBirth, gender, heightFt, heightIn, weightKg, role } = req.body;
 
     if (!email || !password || !name) {
       return res.status(400).json({ message: 'Email, password, and name are required' });
@@ -77,13 +79,24 @@ router.post('/register', async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'User already exists with this email' });
 
-    // UPDATED: Pass new fields to User constructor
-    const user = new User({ email, password, name, phone, dateOfBirth, gender, heightFt, heightIn, weightKg });
+    // UPDATED: Pass new fields (including role) to User constructor
+    const user = new User({ 
+      email, 
+      password, 
+      name, 
+      phone, 
+      dateOfBirth, 
+      gender, 
+      heightFt, 
+      heightIn, 
+      weightKg,
+      role // Add role from request
+    });
     await user.save();
 
     const token = generateToken(user.userId);
 
-    // Ensure all user data is returned to the frontend
+    // Ensure all user data is returned to the frontend, including role
     res.status(201).json({
       message: 'User registered successfully',
       user: { 
@@ -97,6 +110,7 @@ router.post('/register', async (req, res) => {
         heightFt: user.heightFt,
         heightIn: user.heightIn,
         weightKg: user.weightKg,
+        role: user.role // Return role
       },
       token
     });
@@ -119,7 +133,7 @@ router.post('/login', async (req, res) => {
 
     const token = generateToken(user.userId);
 
-    // UPDATED: Ensure all user data is returned to the frontend
+    // UPDATED: Ensure all user data is returned to the frontend, including role
     res.json({
       message: 'Login successful',
       user: { 
@@ -133,6 +147,7 @@ router.post('/login', async (req, res) => {
         heightFt: user.heightFt,
         heightIn: user.heightIn,
         weightKg: user.weightKg,
+        role: user.role // Return role
       },
       token
     });
@@ -149,6 +164,8 @@ router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/signin' }),
   (req, res) => {
     const token = generateToken(req.user.userId);
+    // Redirect to frontend, which will store the token and then redirect to '/'
+    // The Home page will then handle the role-based redirect.
     res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}?token=${token}`);
   }
 );
@@ -174,7 +191,7 @@ router.get('/profile', verifyToken, async (req, res) => {
   try {
     const user = await User.findOne({ userId: req.userId }).select('-password');
     if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json({ user });
+    res.json({ user }); // This will include the 'role'
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch profile', error: error.message });
   }
@@ -187,6 +204,7 @@ router.put('/profile', verifyToken, async (req, res) => {
     // Prevent sensitive fields from being updated via this route
     delete updates.password;
     delete updates.email;
+    delete updates.role; // Role should not be updatable here
 
     const user = await User.findOneAndUpdate(
       { userId: req.userId },

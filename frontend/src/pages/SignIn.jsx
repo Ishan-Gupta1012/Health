@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Heart, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Heart, Mail, Lock, User, Eye, EyeOff, Briefcase, UserCheck } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -17,6 +17,7 @@ const SignIn = () => {
     email: '',
     password: '',
     name: '',
+    role: 'patient', // Default role
   });
 
   const handleSubmit = async (e) => {
@@ -28,11 +29,13 @@ const SignIn = () => {
     if (isLogin) {
       result = await login(formData.email, formData.password);
     } else {
-      result = await register(formData.email, formData.password, formData.name);
+      // Calls register with correct argument order from your useAuth.js
+      // (name, email, password, role)
+      result = await register(formData.name, formData.email, formData.password, formData.role);
     }
 
     if (result.success) {
-      navigate('/');
+      navigate('/'); // Navigate to home, Home.jsx will redirect based on role
     } else {
       setError(result.error);
     }
@@ -58,6 +61,10 @@ const SignIn = () => {
       [e.target.name]: e.target.value
     });
   };
+  
+  const handleRoleChange = (role) => {
+    setFormData({ ...formData, role });
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -82,7 +89,7 @@ const SignIn = () => {
           </h2>
           <p className="text-black/80">
             {isLogin 
-              ? 'Sign in to access your health dashboard' 
+              ? 'Sign in to access your dashboard' 
               : 'Join to manage your health with HealthNest'
             }
           </p>
@@ -106,6 +113,36 @@ const SignIn = () => {
               </motion.div>
             )}
 
+            {/* Role Selector */}
+            {!isLogin && (
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => handleRoleChange('patient')}
+                  className={`flex items-center justify-center p-4 rounded-lg border-2 transition-all ${
+                    formData.role === 'patient' 
+                      ? 'bg-blue-500/30 border-blue-600 text-blue-800' 
+                      : 'bg-white/30 border-white/50 text-black/70 hover:bg-white/50'
+                  }`}
+                >
+                  <UserCheck className="h-5 w-5 mr-2" />
+                  <span className="font-medium">I'm a Patient</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleRoleChange('doctor')}
+                  className={`flex items-center justify-center p-4 rounded-lg border-2 transition-all ${
+                    formData.role === 'doctor' 
+                      ? 'bg-green-500/30 border-green-600 text-green-800' 
+                      : 'bg-white/30 border-white/50 text-black/70 hover:bg-white/50'
+                  }`}
+                >
+                  <Briefcase className="h-5 w-5 mr-2" />
+                  <span className="font-medium">I'm a Doctor</span>
+                </button>
+              </div>
+            )}
+
             {!isLogin && (
               <div>
                 <label htmlFor="name" className="sr-only">Full Name</label>
@@ -118,7 +155,8 @@ const SignIn = () => {
                     required={!isLogin}
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="input pl-10"
+                    /* UPDATED: Added 'pr-4' for right-side padding */
+                    className="input pl-10 pr-4"
                     placeholder="Full Name"
                     data-testid="name-input"
                   />
@@ -138,7 +176,8 @@ const SignIn = () => {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="input pl-10"
+                  /* UPDATED: Added 'pr-4' for right-side padding */
+                  className="input pl-10 pr-4"
                   placeholder="Email Address"
                   data-testid="email-input"
                 />
@@ -157,6 +196,7 @@ const SignIn = () => {
                   required
                   value={formData.password}
                   onChange={handleInputChange}
+                  /* UNCHANGED: This one was correct as 'pr-10' was already present */
                   className="input pl-10 pr-10"
                   placeholder="Password"
                   data-testid="password-input"
