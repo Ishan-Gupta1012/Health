@@ -1,47 +1,39 @@
-// Placeholder controller - NEEDS IMPLEMENTATION
+const { analyzePrescription } = require('../services/geminiService');
 
 /**
- * Controller to handle prescription analysis
- * @param {import('express').Request} req - Express request object (req.file.buffer contains the file data)
- * @param {import('express').Response} res - Express response object
+ * Controller to analyze prescription text using AI
  */
 const analyzePrescriptionController = async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ message: 'No prescription file uploaded.' });
-        }
+  try {
+    console.log('Received request body:', req.body);
+    const { prescriptionText } = req.body;
 
-        console.log('Received file:', req.file.originalname, 'Size:', req.file.size, 'MIME type:', req.file.mimetype);
-
-        // --- TODO: IMPLEMENT PRESCRIPTION ANALYSIS LOGIC ---
-        // 1. Use an OCR library/service on req.file.buffer to extract text.
-        //    Examples: Tesseract.js, Google Cloud Vision API, AWS Textract
-        // 2. Use NLP/AI (e.g., Gemini, regex, keyword matching) on the extracted text
-        //    to identify medicine names, dosages, frequencies.
-
-        // --- Placeholder response ---
-        // Replace this with actual extracted medicines
-        const extractedMedicines = [
-            "Placeholder Medicine 1 500mg",
-            "Placeholder Medicine 2 10mg"
-        ];
-        // --- End Placeholder ---
-
-
-        res.status(200).json({
-            success: true,
-            message: 'Prescription analyzed successfully (placeholder).',
-            medicines: extractedMedicines,
-            // Optionally return raw extracted text:
-            // rawText: "Extracted text from OCR..."
-        });
-
-    } catch (error) {
-        console.error('Error analyzing prescription:', error);
-        res.status(500).json({ message: 'Server error during prescription analysis.' });
+    if (!prescriptionText || prescriptionText.trim() === '') {
+      console.log('Missing or empty prescriptionText');
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Prescription text is required' 
+      });
     }
+
+    console.log('Analyzing prescription...');
+    const analysis = await analyzePrescription(prescriptionText);
+
+    return res.status(200).json({
+      success: true,
+      data: analysis
+    });
+
+  } catch (error) {
+    console.error('--- ERROR DURING PRESCRIPTION ANALYSIS ---');
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to analyze prescription'
+    });
+  }
 };
 
 module.exports = {
-    analyzePrescriptionController,
+  analyzePrescriptionController
 };

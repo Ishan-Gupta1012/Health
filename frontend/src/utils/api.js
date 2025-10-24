@@ -1,18 +1,18 @@
 import axios from 'axios';
 
 // 🌐 Base backend URL (Using your definition)
-const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001'; // Make sure this port matches your backend if it's not 5001
+const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 // 🚀 Axios instance (Using your definition)
 export const api = axios.create({
-  baseURL: `${BASE_URL}/api`, // Ensure '/api' prefix is correct for your backend routes
+  baseURL: `${BASE_URL}/api`,
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: true // Keeping your setting
+  withCredentials: true
 });
 
 // 🔐 Auth header helper (Your existing helper)
 export const getAuthHeaders = () => {
-  const token = localStorage.getItem('healthnest_token'); // Matches your useAuth.js
+  const token = localStorage.getItem('healthnest_token');
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
@@ -55,12 +55,10 @@ export const auth = {
   },
   logout: async () => {
     try {
-      // Assuming your backend has a logout route, adjust if necessary
       return await api.post('/auth/logout', {}, { headers: getAuthHeaders() });
     } catch (err) {
-      // Don't throw error on logout fail, just proceed client-side
       console.error("Logout API call failed:", getErrorMessage(err));
-      return null; // Indicate potential failure but don't block client logout
+      return null;
     }
   }
 };
@@ -178,7 +176,6 @@ export const meals = {
     },
     getMealsByDate: async (date) => {
         try {
-            // Adjust endpoint if needed based on your backend route definition
             const response = await api.get(`/meals/user?date=${date}`, { headers: getAuthHeaders() });
             return response.data;
         } catch (err) {
@@ -193,7 +190,6 @@ export const doctors = {
     try {
       const encodedSpecialty = encodeURIComponent(specialty);
       const encodedLocation = encodeURIComponent(location);
-      // Ensure this endpoint '/doctors' matches your backend route
       const response = await api.get(`/doctors?specialty=${encodedSpecialty}&location=${encodedLocation}`);
       return response.data;
     } catch (err) {
@@ -250,30 +246,33 @@ export const symptomChecker = {
     }
 };
 
-// === ADDED: Prescription API methods ===
+// 💊 Prescription API methods (FIXED)
 export const prescription = {
-  analyzePrescription: async (formData) => {
+  analyze: async (prescriptionText) => {
     try {
-      // Ensure the endpoint '/prescription/analyze' matches your backend route
-      const response = await api.post('/prescription/analyze', formData, {
-        headers: {
-          ...getAuthHeaders(), // Include auth token
-          'Content-Type': 'multipart/form-data', // Correct header for file uploads
-        }
+      const response = await api.post('/prescription/analyze', {
+        prescriptionText
       });
-      return response.data; // Return the full response data
+      return response.data.data;
     } catch (err) {
       throw new Error(getErrorMessage(err));
     }
-  },
-  // Add other prescription methods here if needed later (e.g., doctor creating one)
-  // createPrescription: async (data) => { ... }
+  }
 };
-// === END ADDED SECTION ===
 
+// For backward compatibility, also export as standalone function
+export const analyzePrescription = prescription.analyze;
 
-// 🧩 Centralized API service (MODIFIED)
-// Added 'prescription' to the exported object
-export const apiService = { auth, reminders, records, meals, doctors, chatbot, symptomChecker, prescription };
+// 🧩 Centralized API service (FIXED)
+export const apiService = { 
+  auth, 
+  reminders, 
+  records, 
+  meals, 
+  doctors, 
+  chatbot, 
+  symptomChecker, 
+  prescription 
+};
 
-export default apiService; // Your existing default export
+export default apiService;

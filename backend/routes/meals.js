@@ -1,12 +1,12 @@
 const express = require('express');
 const Meal = require('../models/Meal');
 const { verifyToken } = require('./authMiddleware');
-const { GoogleGenAI } = require("@google/genai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const router = express.Router();
 
 // --- Initialize Gemini AI ---
 const API_KEY = process.env.GEMINI_API_KEY;
-const genAI = API_KEY ? new GoogleGenAI({ apiKey: API_KEY }) : null;
+const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null;
 
 // --- Helper Function to get nutritional data ---
 const getNutritionalData = async (foodItem, quantity) => {
